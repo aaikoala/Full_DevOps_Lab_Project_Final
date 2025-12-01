@@ -9,7 +9,7 @@
 	},
 	"item": [
 		{
-			"name": "GET /register – welcome",
+			"name": "GET /api/register – welcome",
 			"event": [
 				{
 					"listen": "test",
@@ -31,20 +31,33 @@
 					}
 				}
 			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"auth": {
 					"type": "noauth"
 				},
 				"method": "GET",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://localhost:3000/register",
+					"raw": "http://localhost:3000/api/register",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
+						"api",
 						"register"
 					]
 				}
@@ -52,7 +65,7 @@
 			"response": []
 		},
 		{
-			"name": "POST /register – valid user",
+			"name": "POST /api/register – valid user",
 			"event": [
 				{
 					"listen": "test",
@@ -91,13 +104,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/register",
+					"raw": "http://localhost:3000/api/register",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
+						"api",
 						"register"
 					]
 				}
@@ -105,7 +119,7 @@
 			"response": []
 		},
 		{
-			"name": "POST /register – missing fields",
+			"name": "POST /api/register – missing fields",
 			"event": [
 				{
 					"listen": "test",
@@ -134,18 +148,49 @@
 					"raw": "{\r\n  \"name\": \"Only Name\"\r\n}\r\n"
 				},
 				"url": {
-					"raw": "http://localhost:3000/register",
-					"protocol": "http",
+					"raw": "{{baseURL}}/api/register",
 					"host": [
-						"localhost"
+						"{{baseURL}}"
 					],
-					"port": "3000",
 					"path": [
+						"api",
 						"register"
 					]
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "New Request",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Only Name\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/depense",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"depense"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
 		}
 	]
 }

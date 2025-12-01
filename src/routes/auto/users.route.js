@@ -12,14 +12,14 @@ let users = [
 ];
 
 
-router.get("/register", (req, res) => {
+router.get("/api/register", (req, res) => {
   res.status(200).json({
     message: "Bienvenue sur l'API d'inscription. Utilise POST /register avec name, email, password dans le body JSON."
   });
 });
 
 // user registration route
-router.post("/register", (req, res) => {
+router.post("/api/register", (req, res) => {
   const { name, email, password } = req.body;
 
   //field verification

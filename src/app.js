@@ -23,7 +23,7 @@ app.get("/", (_req, res) => res.json({ ok: true, message: "Bonjour from CI/CD de
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
 // Auto-mount all routers placed under src/routes/auto
-const autoDir = path.join(__dirname, "routes", "budget");
+const autoDir = path.join(__dirname, "routes", "auto");
 if (fs.existsSync(autoDir)) {
   const files = fs.readdirSync(autoDir).filter(f => f.endsWith(".route.js"));
   for (const f of files) {
