@@ -1,0 +1,156 @@
+{
+	"info": {
+		"_postman_id": "9a828b10-07d6-4c94-ae55-fce5cd8d6a60",
+		"name": "Budget API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50351656",
+		"_collection_link": "https://abi-vicknes-4791938.postman.co/workspace/Abi-Vi's-Workspace~1ba8d7e7-fe90-42f2-844c-bec1b5607f4a/collection/50351656-9a828b10-07d6-4c94-ae55-fce5cd8d6a60?action=share&source=collection_link&creator=50351656"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an(\"array\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/depense",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"depense"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "New Request",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/depense",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"depense"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "176"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"b0-e1fvae1hHB760j4SlOnuWNByT2g\""
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 01 Dec 2025 08:18:47 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"id\": 1,\n        \"titre\": \"Achat pizza\",\n        \"montant\": 12.5,\n        \"categorie\": \"nourriture\",\n        \"date\": \"2025-01-15\"\n    },\n    {\n        \"id\": 2,\n        \"titre\": \"Livres\",\n        \"montant\": 45,\n        \"categorie\": \"éducation\",\n        \"date\": \"2025-01-16\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains an ID\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"id\");\r",
+							"    pm.expect(jsonData.titre).to.eql(\"burger\"); \r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"titre\": \"burger\",\r\n    \"montant\": 8.50,\r\n    \"categorie\": \"nourriture\",\r\n    \"date\": \"2025-02-10\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/depense",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"depense"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
