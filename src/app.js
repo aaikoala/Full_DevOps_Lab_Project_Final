@@ -22,6 +22,14 @@ app.get("/health", (_req, res) => res.status(200).send("OK"));
 // Auto-mount all routers placed under src/routes/auto
 const autoDir = path.join(__dirname, "routes", "auto");
 
+//app.use(express.json());
+
+// Simple root + health endpoints
+//app.get("/", (_req, res) => res.json({ ok: true, message: "Bonjour from CI/CD demo 👋" }));
+//app.get("/health", (_req, res) => res.status(200).send("OK"));
+
+// Auto-mount all routers placed under src/routes/auto
+//const autoDir = path.join(__dirname, "routes", "budget");
 if (fs.existsSync(autoDir)) {
   const files = fs.readdirSync(autoDir).filter(f => f.endsWith(".route.js"));
   
