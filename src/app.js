@@ -50,6 +50,7 @@ if (fs.existsSync(autoDir)) {
       app.use(`/api/${routeName}`, router);
       
       console.log(`Route activée : /api/${routeName}`);
+      
     }
   }
 }
