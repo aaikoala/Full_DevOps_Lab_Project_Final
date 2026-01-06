@@ -1,7 +1,17 @@
-export function errorHandler(err, req, res, _next) {
-  console.error(err);
+export function errorHandler(err, _req, res, _next) {
+  var status = 500;
+  var message = "Internal Server Error";
 
-  res.status(500).json({
-    error: "Internal server error",
+  if (err && typeof err.status === "number") {
+    status = err.status;
+  }
+
+  if (err && typeof err.message === "string" && err.message.trim() !== "") {
+    message = err.message;
+  }
+
+  return res.status(status).json({
+    error: true,
+    message: message,
   });
 }
