@@ -18,21 +18,19 @@ describe("User Registration API", () => {
       password: "123456"
     };
 
-    const res = await request(app)
-      .post("/api/register")
-      .send(userData);
+    const res = await request(app).post("/api/register").send(userData);
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
-    expect(res.body.name).toBe(userData.name);
+    expect(res.body.name).toBe("Test User");
+    expect(res.body.email).toBe("test@example.com");
+    expect(res.body.password).toBe("123456");
   });
 
   it("POST /api/register returns 400 when required fields are missing", async () => {
     const invalidUser = { name: "Only Name" }; 
 
-    const res = await request(app)
-      .post("/api/register")
-      .send(invalidUser);
+    const res = await request(app).post("/api/register").send(invalidUser);
 
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("error");

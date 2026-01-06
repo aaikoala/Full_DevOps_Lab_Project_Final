@@ -1,5 +1,5 @@
 /**
- * POST /register → create a new user 
+ * POST /register : create a new user 
  */
 import { Router } from "express";
 
@@ -14,7 +14,7 @@ let users = [
 
 router.get("/api/register", (req, res) => {
   res.status(200).json({
-    message: "Bienvenue sur l'API d'inscription. Utilise POST /register avec name, email, password dans le body JSON."
+    message: "Welcome to the registration API. Use POST /register with name, email and password in the JSON body"
   });
 });
 
