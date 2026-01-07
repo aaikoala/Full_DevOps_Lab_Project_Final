@@ -11,15 +11,14 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// IMPORTANT : pour que req.body marche (POST)
 app.use(express.json());
 app.use("/", versionRouter);
 
-// endpoints attendus par les tests
+// endpoints 
 app.get("/", (_req, res) => res.json({ ok: true }));
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-// Auto-mount des routes dans src/routes/auto/*.route.js
+
 const autoDir = path.join(__dirname, "routes", "auto");
 if (fs.existsSync(autoDir)) {
   const files = fs.readdirSync(autoDir).filter((f) => f.endsWith(".route.js"));
@@ -27,7 +26,7 @@ if (fs.existsSync(autoDir)) {
   for (const f of files) {
     const fullPath = path.join(autoDir, f);
 
-    // ✅ NE PAS ENLEVER .href : c’est ce qui rend import() fiable (Windows/Linux)
+    
     const mod = await import(pathToFileURL(fullPath).href);
 
     if (mod.default) {
