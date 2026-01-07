@@ -30,7 +30,7 @@ export async function getTransaction(req, res) {
     }
     res.json(transaction);
   } catch (err) {
-    //Verifie si l'ID est au bon format
+    console.error(err);
     res.status(400).json({ error: "ID invalide" });
   }
 }
@@ -49,6 +49,7 @@ export async function updateTransaction(req, res) {
     }
     res.json(transaction);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: "Erreur lors de la mise à jour" });
   }
 }
@@ -63,6 +64,7 @@ export async function deleteTransaction(req, res) {
     }
     res.status(204).end();
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: "ID invalide" });
   }
 }
