@@ -10,7 +10,13 @@ const transactionSchema = new mongoose.Schema(
       required: true 
     },
     categorie: { type: String, default: "Non spécifié" },
-    date: { type: Date, default: Date.now }
+    date: { type: Date, default: Date.now },
+
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false 
+    }
   },
   { 
     timestamps: true //Date de création
