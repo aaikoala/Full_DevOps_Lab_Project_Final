@@ -1,9 +1,17 @@
-/**
- * Centralized Express error handler.
- * Ensures consistent JSON error shape across the API.
- */
 export function errorHandler(err, _req, res, _next) {
-  const status = err?.status ?? 500;
-  const message = err?.message ?? "Internal Server Error";
-  res.status(status).json({ error: true, message });
+  var status = 500;
+  var message = "Internal Server Error";
+
+  if (err && typeof err.status === "number") {
+    status = err.status;
+  }
+
+  if (err && typeof err.message === "string" && err.message.trim() !== "") {
+    message = err.message;
+  }
+
+  return res.status(status).json({
+    error: true,
+    message: message,
+  });
 }
