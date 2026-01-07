@@ -1,10 +1,3 @@
-/**
- * Express app configuration.
- * Responsibilities:
- *  - Base routes (/, /health)
- *  - Auto-mount all routers in src/routes/auto/*.route.js
- *  - Global error handler (consistent JSON for errors)
- */
 import express from "express";
 import fs from "node:fs";
 import path from "node:path";
@@ -16,14 +9,16 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Simple root + health endpoints
-app.get("/", (_req, res) => res.json({ ok: true, message: "Bonjour from CI/CD demo 👋" }));
+// needed for body json
+app.use(express.json());
+
+// routes
+app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from Budget API 👋" }));
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-// Auto-mount all routers placed under src/routes/auto
 const autoDir = path.join(__dirname, "routes", "auto");
 if (fs.existsSync(autoDir)) {
-  const files = fs.readdirSync(autoDir).filter(f => f.endsWith(".route.js"));
+  const files = fs.readdirSync(autoDir).filter((f) => f.endsWith(".route.js"));
   for (const f of files) {
     const full = path.join(autoDir, f);
     const mod = await import(pathToFileURL(full).href);
@@ -32,7 +27,7 @@ if (fs.existsSync(autoDir)) {
   }
 }
 
-// Global error middleware last
+// error handler
 app.use(errorHandler);
 
 export default app;
