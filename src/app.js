@@ -34,8 +34,15 @@ if (fs.existsSync(autoDir)) {
     const router = mod.default;
 
     if (router) {
-      // Mount the router as-is (routes inside keep their own paths)
-      app.use("/", router);
+      // 2. MODIFICATION : On utilise le nom du fichier pour créer l'URL
+      // "depenses.route.js" devient la route "/api/depenses"
+      const routeName = f.replace(".route.js", "");
+      
+      // On monte le router sur /api/nom_du_fichier
+      app.use(`/api/${routeName}`, router);
+      
+      console.log(`Route activée : /api/${routeName}`);
+      
     }
   }
 }

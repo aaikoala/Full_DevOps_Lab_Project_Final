@@ -2,6 +2,7 @@
  * POST /register : create a new user 
  */
 import { Router } from "express";
+//ajouter bcrypt pour le hachage de mot de passe
 
 const router = Router();
 
