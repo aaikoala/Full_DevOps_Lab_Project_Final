@@ -13,10 +13,9 @@ let categories = [
   { id: 2, name: "Housing" }
 ];
 
-// each expense is linked to a category Id
+// each expense is linked to a category id
 let expenses = [
-  // { id: 1, label: "Pizza", amount: 12, categoryId: 1 }
-];
+   { id: 1, label: "Pizza", amount: 12, categoryId: 1 }];
 
 /**
  * GET /api/categories
@@ -29,7 +28,6 @@ router.get("/api/categories", (req, res) => {
 /**
  * POST /api/categories
  * create a new category
- * expected body JSON: { "name": "Transport" }
  */
 router.post("/api/categories", (req, res) => {
   const { name } = req.body;
@@ -39,41 +37,48 @@ router.post("/api/categories", (req, res) => {
       error: "Category name is required"
     });
   }
+  const cleanName = name.trim();
+  // check if the category already exists
+  const alreadyExists = categories.find(
+    (category) => category.name.toLowerCase() === cleanName.toLowerCase()
+  );
 
+  if (alreadyExists) {
+    return res.status(409).json({
+      error: "Category already exists",
+    });
+  }
   // create new category 
   const newCategory = {
     id: categories.length + 1,
     name
   };
 
-  // add to our array
   categories.push(newCategory);
 
-  // return the created category
+  // return the category created
   res.status(201).json(newCategory);
 });
 
 /**
- * DELETE /api/categories/:id
  * Remove a category by id
- * All existing expenses keep their data but we set categoryId to null for them
  */
 router.delete("/api/categories/:id", (req, res) => {
   const id = Number(req.params.id);
 
-  const categoryIndex = categories.findIndex(cat => cat.id === id);
+  const categoryIndex = categories.findIndex(category  => category .id === id);
 
   if (categoryIndex === -1) {
     return res.status(404).json({
-      error: "Category not found"
+      error: "Category is not found"
     });
   }
 
-  // remove category from the array
-  const deletedCategory = categories[categoryIndex];
-  categories.splice(categoryIndex, 1);
+  // remove the category 
+  const deletedCategory = categories.find(category => category.id === id);
+  categories = categories.filter(category => category.id !== id);   
 
-  // unlink this category from all expenses
+  // unlink this category from all the expenses
   expenses = expenses.map(exp => {
     if (exp.categoryId === id) {
       return { ...exp, categoryId: null };
@@ -98,8 +103,6 @@ router.get("/api/expenses", (req, res) => {
 /**
  * POST /api/expenses
  * Create a new expense linked to a category
- * Expected body JSON:
- * { "label": "Coffee", "amount": 3.5, "categoryId": 1 }
  */
 router.post("/api/expenses", (req, res) => {
   const { label, amount, categoryId } = req.body;
@@ -112,7 +115,7 @@ router.post("/api/expenses", (req, res) => {
   }
 
   // check that the category exists
-  const category = categories.find(cat => cat.id === Number(categoryId));
+  const category = categories.find(category => category.id === Number(categoryId));
   if (!category) {
     return res.status(400).json({
       error: "Invalid categoryId, category does not exist"
