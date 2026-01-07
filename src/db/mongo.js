@@ -1,16 +1,19 @@
-import {MongoClient} from "mongodb" ;
+import mongoose from "mongoose";
 import dotenv from "dotenv";
-dotenv .config ();
 
-const client = new MongoClient(process.env.MONGO_URI);
-let db ;
+dotenv.config();
 
 export async function connectToDb() {
-await client.connect();
-db = client.db();
-console.log(" Connected to MongoDB : " , db.databaseName);
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    
+    console.log("✅ Connecté à MongoDB via Mongoose !");
+  } catch (error) {
+    console.error("❌ Erreur de connexion Mongoose :", error);
+    process.exit(1); 
+  }
 }
 
-export function getDb () {
-    return db ;
+export function getDb() {
+  return mongoose.connection;
 }
