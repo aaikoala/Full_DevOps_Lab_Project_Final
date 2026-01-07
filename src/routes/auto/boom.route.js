@@ -5,10 +5,12 @@ import { Router } from "express";
 
 const router = Router();
 
-router.get("/boom", (_req, _res, next) => {
-  const err = new Error("Boom!");
-  err.status = 500;
-  next(err);
+router.get("/boom", function (_req, res) {
+  res.status(500).json({
+    error: true,
+    message: "Boom!",
+  });
 });
+
 
 export default router;

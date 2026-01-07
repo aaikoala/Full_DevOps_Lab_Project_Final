@@ -9,11 +9,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// needed for body json
+// needed to read JSON body
 app.use(express.json());
 
-// routes
-app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from Budget API 👋" }));
+// Simple root + health endpoints
+app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from CI/CD demo 👋" }));
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
 const autoDir = path.join(__dirname, "routes", "auto");
@@ -27,7 +27,7 @@ if (fs.existsSync(autoDir)) {
   }
 }
 
-// error handler
+// error handler 
 app.use(errorHandler);
 
 export default app;
