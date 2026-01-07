@@ -1,15 +1,14 @@
 /**
- * Express app configuration.
- * Responsibilities:
- *  - Base routes (/, /health)
- *  - Auto-mount all routers in src/routes/auto/*.route.js
- *  - Global error handler (consistent JSON for errors)
+ *  app configuration
+
  */
 import express from "express";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { errorHandler } from "./utils/errorHandler.js";
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
