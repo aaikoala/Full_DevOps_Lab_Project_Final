@@ -2,21 +2,24 @@
  * GET /version → { version: "<package.json version>" }
  * Reads version from package.json to keep it source-of-truth.
  */
-import { Router } from "express";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const router = Router();
+const router = express.Router();
 
 router.get("/version", (_req, res) => {
-  const pkg = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "..", "..", "..", "package.json"), "utf-8")
-  );
-  res.status(200).json({ version: pkg.version });
+  // Chemin vers package.json (ajustez si votre structure est différente)
+  const packagePath = path.join(__dirname, "..", "..", "..", "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf-8"));
+  const version = packageJson.version;
+
+  // Retourne la version au format JSON avec statut 200
+  res.status(200).json({ version });
 });
 
 export default router;
