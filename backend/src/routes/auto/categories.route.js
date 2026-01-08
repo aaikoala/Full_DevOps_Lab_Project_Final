@@ -2,7 +2,6 @@ import { Router } from "express";
 
 const router = Router();
 
-// In-memory data (simple beginner version)
 let categories = [
   { id: 1, name: "Food" },
   { id: 2, name: "Housing" },
@@ -95,7 +94,7 @@ router.post("/api/expenses", function (req, res) {
   const amount = req.body && req.body.amount;
   const categoryId = req.body && req.body.categoryId;
 
-  // categoryId can be 1,2,... (we keep it simple)
+  // categoryId 
   if (!label || amount == null || categoryId == null) {
     return res.status(400).json({ error: true, message: "label, amount and categoryId are required" });
   }
