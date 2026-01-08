@@ -21,7 +21,7 @@ let expenses = [
  * GET /api/categories
  * Return all budget categories
  */
-router.get("/api/categories", (req, res) => {
+router.get('/', (req, res) => {
   res.json(categories);
 });
 
@@ -29,7 +29,7 @@ router.get("/api/categories", (req, res) => {
  * POST /api/categories
  * create a new category
  */
-router.post("/api/categories", (req, res) => {
+router.post('/', (req, res) => {
   const { name } = req.body;
 
   if (!name) {
@@ -63,7 +63,7 @@ router.post("/api/categories", (req, res) => {
 /**
  * Remove a category by id
  */
-router.delete("/api/categories/:id", (req, res) => {
+router.delete("/:id", (req, res) => {
   const id = Number(req.params.id);
 
   const categoryIndex = categories.findIndex(category  => category .id === id);
