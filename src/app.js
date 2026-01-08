@@ -27,7 +27,7 @@ if (fs.existsSync(autoDir)) {
   }
 }
 
-//error handler 
+// Error handler (DOIT être le dernier middleware)
 app.use(errorHandler);
 
 export default app;
