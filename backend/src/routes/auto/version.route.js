@@ -12,10 +12,9 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-router.get("/api/version", function (_req, res) {
+router.get("/", function (_req, res) {
   const pkgPath = path.join(__dirname, "..", "..", "..", "package.json");
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-
   res.status(200).json({ version: pkg.version });
 });
 

@@ -13,7 +13,6 @@ describe("GET /api/version", function () {
 
   it("responds with JSON content-type", async function () {
     const res = await request(app).get("/api/version");
-
     expect(res.headers["content-type"]).toMatch(/application\/json/);
   });
 });
