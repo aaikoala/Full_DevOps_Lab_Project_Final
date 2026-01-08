@@ -4,21 +4,21 @@ import { describe, it, expect } from "vitest";
 
 describe("User Registration API", () => {
 
-  it("GET /api/register returns a welcome message", async () => {
-    const res = await request(app).get("/api/register");
+  it("GET /api/users returns a welcome message", async () => {
+    const res = await request(app).get("/api/users");
 
     expect(res.status).toBe(200);
     expect(typeof res.body.message).toBe("string");
   });
 
-  it("POST /api/register creates a new user when fields are valid", async () => {
+  it("POST /api/users creates a new user when fields are valid", async () => {
     const userData = {
       name: "Test User",
       email: "test@example.com",
       password: "123456"
     };
 
-    const res = await request(app).post("/api/register").send(userData);
+    const res = await request(app).post("/api/users").send(userData);
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("id");
@@ -27,10 +27,10 @@ describe("User Registration API", () => {
     expect(res.body.password).toBe("123456");
   });
 
-  it("POST /api/register returns 400 when required fields are missing", async () => {
+  it("POST /api/users returns 400 when required fields are missing", async () => {
     const invalidUser = { name: "Only Name" }; 
 
-    const res = await request(app).post("/api/register").send(invalidUser);
+    const res = await request(app).post("/api/users").send(invalidUser);
 
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("error");

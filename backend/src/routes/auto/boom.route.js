@@ -5,7 +5,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.get("/boom", function (_req, res) {
+router.get('/', function (_req, res) {
   res.status(500).json({
     error: true,
     message: "Boom!",
