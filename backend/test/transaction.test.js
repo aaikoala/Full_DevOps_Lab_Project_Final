@@ -6,10 +6,9 @@ import Transaction from "../src/models/transaction.model.js";
 import { connectToDb } from "../src/db/mongo.js";
 
 describe("API Transactions (Integration)", () => {
-  
   beforeAll(async () => {
     await connectToDb();
-  }, 30000); 
+  }, 30000);
 
   beforeEach(async () => {
     await Transaction.deleteMany({});
@@ -19,22 +18,20 @@ describe("API Transactions (Integration)", () => {
     await mongoose.connection.close();
   });
 
-  it("devrait créer une transaction (POST)", async () => {
-    const res = await request(app)
-      .post("/api/transaction")
-      .send({
-        titre: "Test Burger",
-        montant: 10,
-        type: "depense",
-        categorie: "Nourriture"
-      });
+  it("should create a transaction (POST)", async () => {
+    const res = await request(app).post("/api/transaction").send({
+      titre: "Test Burger",
+      montant: 10,
+      type: "depense",
+      categorie: "Nourriture",
+    });
 
     expect(res.statusCode).toBe(201);
     expect(res.body.titre).toBe("Test Burger");
-    expect(res.body).toHaveProperty("_id"); 
+    expect(res.body).toHaveProperty("_id");
   }, 30000);
 
-  it("devrait récupérer toutes les transactions (GET)", async () => {
+  it("should get all transactions (GET)", async () => {
     await Transaction.create({ titre: "Salaire", montant: 2000, type: "revenu" });
 
     const res = await request(app).get("/api/transaction");
@@ -45,14 +42,14 @@ describe("API Transactions (Integration)", () => {
     expect(res.body[0].titre).toBe("Salaire");
   }, 30000);
 
-  it("devrait supprimer une transaction (DELETE)", async () => {
-    const t = await Transaction.create({ titre: "A supprimer", montant: 5, type: "depense" });
-    const id = t._id.toString(); 
+  it("should delete a transaction (DELETE)", async () => {
+    const t = await Transaction.create({ titre: "To delete", montant: 5, type: "depense" });
+    const id = t._id.toString();
 
-    const res = await request(app).delete(`/api/transaction/${id}`);
+    const res = await request(app).delete("/api/transaction/" + id);
     expect(res.statusCode).toBe(204);
 
-    const verif = await Transaction.findById(id);
-    expect(verif).toBeNull();
+    const check = await Transaction.findById(id);
+    expect(check).toBeNull();
   }, 30000);
 });
