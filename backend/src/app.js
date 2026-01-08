@@ -11,23 +11,26 @@ const app = express();
 app.use(express.json());
 
 // Base endpoints
-app.get("/", (_req, res) =>
-  res.json({ ok: true, message: "Hello from CI/CD demo 👋" })
-);
+app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from CI/CD demo 👋" }));
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-// Auto-mount all routers in src/routes/auto/*.route.js
+// Auto-mount all routers in src/routes/auto/*.route.js under /api/<name>
 const autoDir = path.join(__dirname, "routes", "auto");
 if (fs.existsSync(autoDir)) {
   const files = fs.readdirSync(autoDir).filter((f) => f.endsWith(".route.js"));
+
   for (const f of files) {
     const full = path.join(autoDir, f);
     const mod = await import(pathToFileURL(full).href);
-    if (mod?.default) app.use("/", mod.default);
+
+    if (mod.default) {
+      const routeName = f.replace(".route.js", "");
+      app.use("/api/" + routeName, mod.default);
+    }
   }
 }
 
-// Error handler (DOIT être le dernier middleware)
+// Error handler must be last
 app.use(errorHandler);
 
 export default app;

@@ -4,11 +4,17 @@ const router = Router();
 
 let expenses = [{ id: 1, label: "Pizza", amount: 12, categoryId: 1 }];
 
-router.get("/", (_req, res) => {
+// GET /api/expenses
+router.get("/", function (_req, res) {
   res.status(200).json(expenses);
 });
-router.post("/", (req, res) => {
-  const { label, amount, categoryId } = req.body;
+
+// POST /api/expenses
+router.post("/", function (req, res) {
+  const body = req.body || {};
+  const label = body.label;
+  const amount = body.amount;
+  const categoryId = body.categoryId;
 
   if (!label || amount == null || categoryId == null) {
     return res.status(400).json({ error: true, message: "label, amount and categoryId are required" });
@@ -16,9 +22,9 @@ router.post("/", (req, res) => {
 
   const newExpense = {
     id: expenses.length + 1,
-    label,
-    amount,
-    categoryId,
+    label: label,
+    amount: amount,
+    categoryId: Number(categoryId)
   };
 
   expenses.push(newExpense);

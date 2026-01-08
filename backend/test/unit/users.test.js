@@ -2,33 +2,31 @@ import request from "supertest";
 import app from "../../src/app.js";
 import { describe, it, expect } from "vitest";
 
-describe("User Registration API", () => {
-
-  it("GET /api/users returns a welcome message", async () => {
+describe("Users API", () => {
+  it("GET /api/users returns a list", async () => {
     const res = await request(app).get("/api/users");
-
     expect(res.status).toBe(200);
-    expect(typeof res.body.message).toBe("string");
+    expect(Array.isArray(res.body)).toBe(true);
   });
 
   it("POST /api/users creates a new user when fields are valid", async () => {
     const userData = {
-      name: "Test User",
+      username: "TestUser",
       email: "test@example.com",
-      password: "123456"
+      password: "123456",
     };
 
     const res = await request(app).post("/api/users").send(userData);
 
     expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty("id");
-    expect(res.body.name).toBe("Test User");
+    expect(res.body).toHaveProperty("_id");
+    expect(res.body.username).toBe("TestUser");
     expect(res.body.email).toBe("test@example.com");
-    expect(res.body.password).toBe("123456");
+    expect(res.body).not.toHaveProperty("password");
   });
 
   it("POST /api/users returns 400 when required fields are missing", async () => {
-    const invalidUser = { name: "Only Name" }; 
+    const invalidUser = { username: "OnlyName" };
 
     const res = await request(app).post("/api/users").send(invalidUser);
 
