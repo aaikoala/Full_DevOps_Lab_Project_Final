@@ -2,6 +2,7 @@ import { Router } from "express";
 
 const router = Router();
 
+// In-memory data (simple beginner version)
 let categories = [
   { id: 1, name: "Food" },
   { id: 2, name: "Housing" },
@@ -11,21 +12,20 @@ let expenses = [
   { id: 1, label: "Pizza", amount: 12, categoryId: 1 },
 ];
 
-
 /**
  * GET /api/categories
  * Return all budget categories
  */
-router.get('/', (req, res) => {
-  res.json(categories);
+router.get("/api/categories", function (req, res) {
+  res.status(200).json(categories);
 });
 
 /**
  * POST /api/categories
- * create a new category
+ * Create a new category
  */
-router.post('/', (req, res) => {
-  const { name } = req.body;
+router.post("/api/categories", function (req, res) {
+  const name = req.body && req.body.name;
 
   if (!name) {
     return res.status(400).json({ error: true, message: "Category name is required" });
@@ -33,7 +33,10 @@ router.post('/', (req, res) => {
 
   const cleanName = String(name).trim();
 
-  const exists = categories.some((c) => c.name.toLowerCase() === cleanName.toLowerCase());
+  const exists = categories.some(function (c) {
+    return c.name.toLowerCase() === cleanName.toLowerCase();
+  });
+
   if (exists) {
     return res.status(409).json({ error: true, message: "Category already exists" });
   }
@@ -45,47 +48,73 @@ router.post('/', (req, res) => {
 });
 
 /**
+ * DELETE /api/categories/:id
  * Remove a category by id
  */
-router.delete("/:id", (req, res) => {
+router.delete("/api/categories/:id", function (req, res) {
   const id = Number(req.params.id);
 
-  const exists = categories.some((c) => c.id === id);
+  const exists = categories.some(function (c) {
+    return c.id === id;
+  });
+
   if (!exists) {
     return res.status(404).json({ error: true, message: "Category not found" });
   }
 
-  categories = categories.filter((c) => c.id !== id);
+  // remove category
+  categories = categories.filter(function (c) {
+    return c.id !== id;
+  });
 
   // unlink category from expenses
-  expenses = expenses.map((e) => (e.categoryId === id ? { ...e, categoryId: null } : e));
+  expenses = expenses.map(function (e) {
+    if (e.categoryId === id) {
+      return { id: e.id, label: e.label, amount: e.amount, categoryId: null };
+    }
+    return e;
+  });
 
   res.status(200).json({ message: "Category deleted" });
 });
 
-// GET /api/expenses
-router.get("/api/expenses", (_req, res) => {
+/**
+ * GET /api/expenses
+ * Return all expenses
+ */
+router.get("/api/expenses", function (_req, res) {
   res.status(200).json(expenses);
 });
 
-// POST /api/expenses
-router.post("/api/expenses", (req, res) => {
-  const { label, amount, categoryId } = req.body;
+/**
+ * POST /api/expenses
+ * Create a new expense
+ */
+router.post("/api/expenses", function (req, res) {
+  const label = req.body && req.body.label;
+  const amount = req.body && req.body.amount;
+  const categoryId = req.body && req.body.categoryId;
 
-  if (!label || amount == null || !categoryId) {
+  // categoryId can be 1,2,... (we keep it simple)
+  if (!label || amount == null || categoryId == null) {
     return res.status(400).json({ error: true, message: "label, amount and categoryId are required" });
   }
 
-  const categoryExists = categories.some((c) => c.id === Number(categoryId));
+  const catIdNumber = Number(categoryId);
+
+  const categoryExists = categories.some(function (c) {
+    return c.id === catIdNumber;
+  });
+
   if (!categoryExists) {
     return res.status(400).json({ error: true, message: "Invalid categoryId, category does not exist" });
   }
 
   const newExpense = {
     id: expenses.length + 1,
-    label,
-    amount,
-    categoryId: Number(categoryId),
+    label: label,
+    amount: amount,
+    categoryId: catIdNumber,
   };
 
   expenses.push(newExpense);
