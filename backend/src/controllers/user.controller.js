@@ -3,30 +3,45 @@ import User from "../models/user.model.js";
 
 const memoryUsers = [];
 
-function isDbReady() {
-  return mongoose.connection && mongoose.connection.readyState === 1;
+function dbReady() {
+  if (!mongoose.connection) return false;
+  if (mongoose.connection.readyState === 1) return true;
+  return false;
+}
+function findMemoryUser(id) {
+  let i = 0;
+  while (i < memoryUsers.length) {
+    if (String(memoryUsers[i]._id) === String(id)) {
+      return memoryUsers[i];
+    }
+    i = i + 1;
+  }
+  return null;
+}
+
+function removePassword(user) {
+  return { _id: user._id, username: user.username, email: user.email };
 }
 
 /**
  * GET /api/users
- * Returns a list of users
  */
 export async function listUsers(req, res, next) {
   try {
-    if (!isDbReady()) {
-      // sans DB : renvoie la liste mémoire (sans password)
-      const safe = memoryUsers.map((u) => ({
-        _id: u._id,
-        username: u.username,
-        email: u.email,
-      }));
-      return res.status(200).json(safe);
+    if (!dbReady()) {
+      const out = [];
+      let i = 0;
+      while (i < memoryUsers.length) {
+        out.push(removePassword(memoryUsers[i]));
+        i = i + 1;
+      }
+      return res.status(200).json(out);
     }
 
     const users = await User.find().select("-password").lean();
-    res.status(200).json(users);
+    return res.status(200).json(users);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
@@ -35,33 +50,33 @@ export async function listUsers(req, res, next) {
  */
 export async function getUser(req, res, next) {
   try {
-    if (!isDbReady()) {
-      const found = memoryUsers.find((u) => String(u._id) === String(req.params.id));
+    if (!dbReady()) {
+      const found = findMemoryUser(req.params.id);
       if (!found) {
         return res.status(404).json({ error: true, message: "User not found" });
       }
-      return res.status(200).json({ _id: found._id, username: found.username, email: found.email });
+      return res.status(200).json(removePassword(found));
     }
 
     const user = await User.findById(req.params.id).select("-password").lean();
     if (!user) {
       return res.status(404).json({ error: true, message: "User not found" });
     }
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
 /**
  * POST /api/users
- * body: { username, email, password }
  */
 export async function createUser(req, res, next) {
   try {
-    const username = req.body && req.body.username;
-    const email = req.body && req.body.email;
-    const password = req.body && req.body.password;
+    const body = req.body;
+    const username = body && body.username;
+    const email = body && body.email;
+    const password = body && body.password;
 
     if (!username || !email || !password) {
       return res.status(400).json({
@@ -70,33 +85,34 @@ export async function createUser(req, res, next) {
       });
     }
 
-    if (!isDbReady()) {
-      // sans DB : création en mémoire
-      const id = new mongoose.Types.ObjectId().toString();
-
-      // Simule le unique (username/email)
-      const exists = memoryUsers.some((u) => u.username === username || u.email === email);
-      if (exists) {
-        return res.status(409).json({ error: true, message: "username or email already exists" });
+    if (!dbReady()) {
+      // unique check simple
+      let i = 0;
+      while (i < memoryUsers.length) {
+        if (memoryUsers[i].username === username) {
+          return res.status(409).json({ error: true, message: "username or email already exists" });
+        }
+        if (memoryUsers[i].email === email) {
+          return res.status(409).json({ error: true, message: "username or email already exists" });
+        }
+        i = i + 1;
       }
 
+      const id = String(new mongoose.Types.ObjectId());
       const created = { _id: id, username: username, email: email, password: password };
       memoryUsers.push(created);
 
-      return res.status(201).json({ _id: id, username: username, email: email });
+      return res.status(201).json(removePassword(created));
     }
 
-    const created = await User.create({ username, email, password });
-    const safe = await User.findById(created._id).select("-password").lean();
-    res.status(201).json(safe);
+    const createdDb = await User.create({ username: username, email: email, password: password });
+    const safe = await User.findById(createdDb._id).select("-password").lean();
+    return res.status(201).json(safe);
   } catch (err) {
     if (err && err.code === 11000) {
-      return res.status(409).json({
-        error: true,
-        message: "username or email already exists",
-      });
+      return res.status(409).json({ error: true, message: "username or email already exists" });
     }
-    next(err);
+    return next(err);
   }
 }
 
@@ -106,38 +122,47 @@ export async function createUser(req, res, next) {
 export async function updateUser(req, res, next) {
   try {
     const updates = req.body || {};
+    const id = req.params.id;
 
-    if (!isDbReady()) {
-      const i = memoryUsers.findIndex((u) => String(u._id) === String(req.params.id));
-      if (i === -1) {
+    if (!dbReady()) {
+      let index = -1;
+      let i = 0;
+
+      while (i < memoryUsers.length) {
+        if (String(memoryUsers[i]._id) === String(id)) {
+          index = i;
+        }
+        i = i + 1;
+      }
+
+      if (index === -1) {
         return res.status(404).json({ error: true, message: "User not found" });
       }
-      // unique check basique
+
+      // unique check simple
       if (updates.username || updates.email) {
-        const conflict = memoryUsers.some((u) => {
-          if (String(u._id) === String(req.params.id)) return false;
-          if (updates.username && u.username === updates.username) return true;
-          if (updates.email && u.email === updates.email) return true;
-          return false;
-        });
-        if (conflict) {
-          return res.status(409).json({ error: true, message: "username or email already exists" });
+        i = 0;
+        while (i < memoryUsers.length) {
+          if (i !== index) {
+            if (updates.username && memoryUsers[i].username === updates.username) {
+              return res.status(409).json({ error: true, message: "username or email already exists" });
+            }
+            if (updates.email && memoryUsers[i].email === updates.email) {
+              return res.status(409).json({ error: true, message: "username or email already exists" });
+            }
+          }
+          i = i + 1;
         }
       }
 
-      const current = memoryUsers[i];
-      memoryUsers[i] = {
-        _id: current._id,
-        username: updates.username ? updates.username : current.username,
-        email: updates.email ? updates.email : current.email,
-        password: updates.password ? updates.password : current.password,
-      };
+      if (updates.username) memoryUsers[index].username = updates.username;
+      if (updates.email) memoryUsers[index].email = updates.email;
+      if (updates.password) memoryUsers[index].password = updates.password;
 
-      const out = memoryUsers[i];
-      return res.status(200).json({ _id: out._id, username: out.username, email: out.email });
+      return res.status(200).json(removePassword(memoryUsers[index]));
     }
 
-    const updated = await User.findByIdAndUpdate(req.params.id, updates, {
+    const updated = await User.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
     })
@@ -148,15 +173,12 @@ export async function updateUser(req, res, next) {
       return res.status(404).json({ error: true, message: "User not found" });
     }
 
-    res.status(200).json(updated);
+    return res.status(200).json(updated);
   } catch (err) {
     if (err && err.code === 11000) {
-      return res.status(409).json({
-        error: true,
-        message: "username or email already exists",
-      });
+      return res.status(409).json({ error: true, message: "username or email already exists" });
     }
-    next(err);
+    return next(err);
   }
 }
 
@@ -165,21 +187,34 @@ export async function updateUser(req, res, next) {
  */
 export async function deleteUser(req, res, next) {
   try {
-    if (!isDbReady()) {
-      const i = memoryUsers.findIndex((u) => String(u._id) === String(req.params.id));
-      if (i === -1) {
+    const id = req.params.id;
+
+    if (!dbReady()) {
+      let index = -1;
+      let i = 0;
+
+      while (i < memoryUsers.length) {
+        if (String(memoryUsers[i]._id) === String(id)) {
+          index = i;
+        }
+        i = i + 1;
+      }
+
+      if (index === -1) {
         return res.status(404).json({ error: true, message: "User not found" });
       }
-      memoryUsers.splice(i, 1);
+
+      memoryUsers.splice(index, 1);
       return res.status(204).end();
     }
 
-    const deleted = await User.findByIdAndDelete(req.params.id).lean();
+    const deleted = await User.findByIdAndDelete(id).lean();
     if (!deleted) {
       return res.status(404).json({ error: true, message: "User not found" });
     }
-    res.status(204).end();
+
+    return res.status(204).end();
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
