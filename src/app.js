@@ -1,9 +1,9 @@
 /**
  * Express app configuration.
  * Responsibilities:
- *  - Base routes (/, /health)
+ *  - routes
  *  - Auto-mount all routers in src/routes/auto/*.route.js
- *  - Global error handler (consistent JSON for errors)
+
  */
 import express from "express";
 import fs from "node:fs";
