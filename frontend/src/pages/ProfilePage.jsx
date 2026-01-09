@@ -1,143 +1,53 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
-  const [msg, setMsg] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(function () { 
-    const raw = localStorage.getItem("currentUser"); 
-    if (!raw) { 
-        return; } 
-    const parsed = JSON.parse(raw); 
-    setTimeout(function () { 
-        setUser(parsed); 
-        }, 0); 
-    }, []);
-
-  function logout() {
-    localStorage.removeItem("currentUser");
-    setUser(null);
-    setMsg("Logged out");
-  }
-
-  async function deleteAccount() {
-    setMsg("");
-
-    if (!user) {
-      setMsg("You are not logged in");
-      return;
-    }
+  const [user, setUser] = useState(function () {
+    const raw = localStorage.getItem("session");
+    if (!raw) return null;
 
     try {
-      const res = await fetch("/api/users/" + user._id, {
-        method: "DELETE",
-      });
-
-      if (res.status === 204) {
-        localStorage.removeItem("currentUser");
-        setUser(null);
-        setMsg("Account deleted");
-        return;
-      }
-
-      const data = await res.json();
-      setMsg(data.message);
-    } catch {
-      setMsg("Backend not reachable");
+      const session = JSON.parse(raw);
+      if (session && session.user) return session.user;
+      return null;
+    } catch (error) {
+      console.log(error);
+      return null;
     }
+  });
+
+  const [msg, setMsg] = useState("");
+
+  function logout() {
+    localStorage.removeItem("session");
+    setUser(null);
+    setMsg("Logged out");
+    navigate("/login");
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>My Account</h1>
+    <div style={{ maxWidth: 700, margin: "0 auto", padding: 20 }}>
+      <h1>My Account</h1>
 
-        {!user && (
-          <div>
-            <p style={styles.text}>You are not logged in.</p>
-            <Link to="/login" style={styles.link}>
-              Go to Login
-            </Link>
-          </div>
-        )}
+      {user === null && (
+        <div>
+          <p>You are not logged in.</p>
+          <Link to="/login">Go to Login</Link>
+        </div>
+      )}
 
-        {user && (
-          <div>
-            <p style={styles.text}>
-              <b>Username:</b> {user.username}
-            </p>
-            <p style={styles.text}>
-              <b>Email:</b> {user.email}
-            </p>
+      {user !== null && (
+        <div>
+          <p><b>Username:</b> {user.username}</p>
+          <p><b>Email:</b> {user.email}</p>
 
-            <div style={styles.row}>
-              <button onClick={logout} style={styles.btn}>
-                Logout
-              </button>
-              <button onClick={deleteAccount} style={styles.dangerBtn}>
-                Delete account
-              </button>
-            </div>
-          </div>
-        )}
+          <button type="button" onClick={logout}>Logout</button>
 
-        {msg !== "" && <p style={styles.msg}>{msg}</p>}
-      </div>
+          {msg !== "" && <p>{msg}</p>}
+        </div>
+      )}
     </div>
   );
 }
-
-const styles = {
-  page: {
-    background: "#ffffff3c",
-    minHeight: "80vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  card: {
-    width: 450,
-    border: "1px solid #dddddd3b",
-    borderRadius: 10,
-    padding: 24,
-    background: "#ffffff3c",
-  },
-  title: {
-    marginTop: 0,
-    marginBottom: 15,
-    color: "white",
-  },
-  text: {
-    color: "white",
-    marginBottom: 10,
-  },
-  row: {
-    display: "flex",
-    gap: 10,
-    marginTop: 15,
-  },
-  btn: {
-    padding: "10px 12px",
-    borderRadius: 6,
-    border: "1px solid #aaa",
-    background: "#f5f5f5",
-    cursor: "pointer",
-  },
-  dangerBtn: {
-    padding: "10px 12px",
-    borderRadius: 6,
-    border: "1px solid red",
-    background: "#ffe5e5",
-    cursor: "pointer",
-  },
-  msg: {
-    marginTop: 15,
-    color: "red",
-  },
-  link: {
-    color: "black",
-    textDecoration: "underline",
-  },
-};

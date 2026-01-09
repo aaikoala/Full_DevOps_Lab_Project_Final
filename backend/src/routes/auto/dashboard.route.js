@@ -1,63 +1,58 @@
 import { Router } from "express";
+import { requireAuth } from "../../utils/requireAuth.js";
 import Transaction from "../../models/transaction.model.js";
+import User from "../../models/user.model.js";
 
 const router = Router();
 
-function toNumber(value) {
-  const n = Number(value);
-  if (Number.isNaN(n)) return 0;
-  return n;
-}
-
-router.get("/", async function (req, res, next) {
+router.get("/", requireAuth, async function (req, res, next) {
   try {
-    
-    const monthlyBudget = 1200;
-
-    const transactions = await Transaction.find({}).lean();
-
-    let totalExpenses = 0;
-    const byCategoryMap = {};
-
-    for (let i = 0; i < transactions.length; i = i + 1) {
-      const t = transactions[i];
-
-      const type = t.type;
-      const amount = toNumber(t.montant);
-      const category = t.categorie || "other";
-
-      if (type === "depense") {
-        totalExpenses = totalExpenses + amount;
-
-        if (!byCategoryMap[category]) {
-          byCategoryMap[category] = 0;
-        }
-        byCategoryMap[category] = byCategoryMap[category] + amount;
-      }
+    const user = await User.findById(req.userId).select("monthlyBudget").lean();
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const remaining = monthlyBudget - totalExpenses;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const byCategory = Object.keys(byCategoryMap).map(function (key) {
-      return {
-        category: key,
-        amount: byCategoryMap[key],
-      };
-    });
+    const expenses = await Transaction.find({
+      userId: req.userId,
+      type: "depense",
+      date: { $gte: start, $lt: end }
+    }).lean();
 
-    // sort biggest first
-    byCategory.sort(function (a, b) {
-      return b.amount - a.amount;
-    });
+    let total = 0;
+    const by = {};
 
-    return res.status(200).json({
+    for (let i = 0; i < expenses.length; i = i + 1) {
+      const t = expenses[i];
+      total = total + t.montant;
+
+      const cat = t.categorie || "other";
+      if (!by[cat]) by[cat] = 0;
+      by[cat] = by[cat] + t.montant;
+    }
+
+    const keys = Object.keys(by);
+    const byCategory = [];
+
+    for (let j = 0; j < keys.length; j = j + 1) {
+      const k = keys[j];
+      byCategory.push({ category: k, amount: by[k] });
+    }
+
+    const monthlyBudget = user.monthlyBudget || 0;
+    const remaining = monthlyBudget - total;
+
+    res.status(200).json({
       monthlyBudget: monthlyBudget,
-      totalExpenses: totalExpenses,
+      totalExpenses: total,
       remaining: remaining,
-      byCategory: byCategory,
+      byCategory: byCategory
     });
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 

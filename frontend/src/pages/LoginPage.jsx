@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -16,19 +19,13 @@ export default function LoginPage() {
 
     if (mode === "register") {
       url = "/api/auth/register";
-      body = {
-        username: username,
-        email: email,
-        password: password,
-      };
+      body = { username: username, email: email, password: password };
     }
 
     try {
       const res = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
@@ -39,127 +36,46 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("currentUser", JSON.stringify(data));
+      localStorage.setItem("session", JSON.stringify(data));
       setMsg("Success");
-    } catch {
+
+      navigate("/profile");
+    } catch  {
       setMsg("Backend not reachable");
     }
   }
 
   function switchMode() {
-    if (mode === "login") {
-      setMode("register");
-    } else {
-      setMode("login");
-    }
+    if (mode === "login") setMode("register");
+    else setMode("login");
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>
-          {mode === "login" && "Login"}
-          {mode === "register" && "Register"}
-        </h1>
+    <div style={{ maxWidth: 500, margin: "0 auto", padding: 20 }}>
+      <h1>{mode === "login" ? "Login" : "Register"}</h1>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          {mode === "register" && (
-            <>
-              <label style={styles.label}>Username</label>
-              <input
-                style={styles.input}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </>
-          )}
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {mode === "register" && (
+          <>
+            <label>Username</label>
+            <input value={username} onChange={function (e) { setUsername(e.target.value); }} />
+          </>
+        )}
 
-          <label style={styles.label}>Email</label>
-          <input
-            style={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <label>Email</label>
+        <input value={email} onChange={function (e) { setEmail(e.target.value); }} />
 
-          <label style={styles.label}>Password</label>
-          <input
-            type="password"
-            style={styles.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <label>Password</label>
+        <input type="password" value={password} onChange={function (e) { setPassword(e.target.value); }} />
 
-          <button style={styles.button}>
-            Submit
-          </button>
-        </form>
+        <button type="submit">Submit</button>
+      </form>
 
-        {msg !== "" && <p style={styles.msg}>{msg}</p>}
+      {msg !== "" && <p style={{ color: "red" }}>{msg}</p>}
 
-        <button style={styles.switch} onClick={switchMode}>
-          Switch to {mode === "login" && "Register"}
-          {mode === "register" && "Login"}
-        </button>
-      </div>
+      <button type="button" onClick={switchMode} style={{ marginTop: 10 }}>
+        Switch to {mode === "login" ? "Register" : "Login"}
+      </button>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: "80vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#ffffff35",
-  },
-  card: {
-    width: 350,
-    padding: 30,
-    borderRadius: 10,
-    border: "1px solid #dddddd37",
-    background: "#ffffff35",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: 20,
-    color: "white",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  label: {
-    color: "white",
-    marginTop: 10,
-    marginBottom: 5,
-    fontWeight: "bold",
-  },
-  input: {
-    padding: 8,
-    borderRadius: 5,
-    border: "1px solid #aaa",
-  },
-  button: {
-    marginTop: 20,
-    padding: 10,
-    background: "black",
-    color: "white",
-    border: "none",
-    borderRadius: 5,
-    cursor: "pointer",
-  },
-  switch: {
-    marginTop: 15,
-    background: "none",
-    border: "none",
-    color: "white",
-    cursor: "pointer",
-    textDecoration: "underline",
-  },
-  msg: {
-    marginTop: 10,
-    color: "red",
-    textAlign: "center",
-  },
-};

@@ -1,49 +1,48 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { apiFetch } from "../utils/api";
 
 export default function useTransactions() {
-    const [transactions, setTransactions] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [items, setItems] = useState([]);
+  const [msg, setMsg] = useState("");
 
-    async function loadTransactions() {
-        try {
-            setError("");
-            setLoading(true);
-            const res = await fetch("/api/transaction");
-            
-            if (!res.ok) throw new Error(`HTTP ${res.status}`); 
-            
-            const data = await res.json();
-            setTransactions(data);
-        } catch (e) {
-            setError(e.message);
-        } finally {
-            setLoading(false);
-        }
+  async function load() {
+    setMsg("");
+    try {
+      const res = await apiFetch("/api/transaction");
+      if (!res.ok) {
+        const data = await res.json();
+        if (data && data.message) setMsg(data.message);
+        else setMsg("Cannot load transactions");
+        return;
+      }
+      const data = await res.json();
+      setItems(data);
+    } catch  {
+      setMsg("Backend not reachable");
     }
+  }
 
-    async function deleteTransaction(id) {
-        if (!window.confirm("Voulez-vous vraiment supprimer ?")) return;
+  async function add(payload) {
+    setMsg("");
+    try {
+      const res = await apiFetch("/api/transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-        try {
-            const res = await fetch(`/api/transaction/${id}`, { method: "DELETE" });
-            if (res.ok) {
-                setTransactions((prev) => prev.filter((t) => t._id !== id));
-            }
-        } catch (e) {
-            console.error("Erreur delete:", e);
-        }
+      if (!res.ok) {
+        const data = await res.json();
+        if (data && data.message) setMsg(data.message);
+        else setMsg("Cannot add transaction");
+        return;
+      }
+
+      await load();
+    } catch  {
+      setMsg("Backend not reachable");
     }
+  }
 
-    useEffect(() => {
-        loadTransactions();
-    }, []);
-
-    return { 
-        transactions, 
-        loading, 
-        error, 
-        reload: loadTransactions,
-        deleteTransaction 
-    };
+  return { items, msg, load, add };
 }

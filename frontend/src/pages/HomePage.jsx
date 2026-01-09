@@ -1,115 +1,247 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { apiFetch, getSession } from "../utils/api";
 
 export default function HomePage() {
   const [data, setData] = useState(null);
+  const [budgetInput, setBudgetInput] = useState("");
   const [msg, setMsg] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const loadDashboard = useCallback(async function () {
+  function logoutBecauseTokenIsInvalid() {
+    localStorage.removeItem("session");
+    setData(null);
+    setBudgetInput("");
+    setMsg("Your session expired. Please login again.");
+  }
+
+  function getColors() {
+    return ["#4f46e5", "#16a34a", "#f97316", "#dc2626", "#0ea5e9", "#a855f7"];
+  }
+
+  function getColor(i) {
+    const colors = getColors();
+    return colors[i % colors.length];
+  }
+
+  function buildGradient(items, total) {
+    let start = 0;
+    const parts = [];
+
+    for (let i = 0; i < items.length; i = i + 1) {
+      const x = items[i];
+      const pct = (x.amount / total) * 100;
+      const end = start + pct;
+      const color = getColor(i);
+
+      parts.push(color + " " + start + "% " + end + "%");
+      start = end;
+    }
+
+    return "conic-gradient(" + parts.join(", ") + ")";
+  }
+
+  async function loadDashboard() {
     setMsg("");
-    setLoading(true);
+
+    const session = getSession();
+    if (!session) {
+      setMsg("Please login to see your dashboard");
+      setData(null);
+      return;
+    }
 
     try {
-      const res = await fetch("/api/dashboard");
+      const res = await apiFetch("/api/dashboard");
       const json = await res.json();
 
-      if (res.ok) {
-        setData(json);
-        setLoading(false);
+      if (!res.ok) {
+        if (res.status === 401) {
+          logoutBecauseTokenIsInvalid();
+          return;
+        }
+
+        if (json && json.message) setMsg(json.message);
+        else setMsg("Error loading dashboard");
+
+        setData(null);
         return;
       }
 
-      setMsg("Error loading dashboard");
-      setLoading(false);
+      setData(json);
+      setBudgetInput(String(json.monthlyBudget));
     } catch (err) {
+      console.log(err);
       setMsg("Backend not reachable");
-      setLoading(false);
     }
-  }, []);
+  }
+
+  async function saveBudget() {
+    setMsg("");
+
+    const session = getSession();
+    if (!session) {
+      setMsg("Please login before saving your budget");
+      return;
+    }
+
+    const value = Number(budgetInput);
+    if (Number.isNaN(value) || value < 0) {
+      setMsg("Budget must be a non-negative number");
+      return;
+    }
+
+    try {
+      const res = await apiFetch("/api/budgetmensuel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ budget: value })
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          logoutBecauseTokenIsInvalid();
+          return;
+        }
+
+        if (json && json.message) setMsg(json.message);
+        else setMsg("Error saving budget");
+        return;
+      }
+
+      if (typeof json.budget === "number") {
+        setBudgetInput(String(json.budget));
+      }
+
+      setMsg("Budget saved");
+      await loadDashboard();
+    } catch (err) {
+      console.log(err);
+      setMsg("Backend not reachable");
+    }
+  }
 
   useEffect(function () {
-    loadDashboard();
-  }, [loadDashboard]);
+    async function start() {
+      await loadDashboard();
+    }
+    start();
+  }, []);
 
-  let spentPercent = 0;
-  if (data && data.monthlyBudget > 0) {
-    spentPercent = (data.totalExpenses / data.monthlyBudget) * 100;
+  let byCategory = [];
+  let total = 0;
+  let gradient = "";
+
+  if (data) {
+    if (Array.isArray(data.byCategory)) byCategory = data.byCategory;
+    if (typeof data.totalExpenses === "number") total = data.totalExpenses;
+    if (total > 0) gradient = buildGradient(byCategory, total);
   }
-  if (spentPercent < 0) spentPercent = 0;
-  if (spentPercent > 100) spentPercent = 100;
+  let isOverBudget = false;
+  let isWarning = false;
+
+  if (data) {
+    if (typeof data.remaining === "number") {
+      isOverBudget = data.remaining < 0;
+      isWarning = data.remaining >= 0 && data.monthlyBudget > 0 && data.remaining <= data.monthlyBudget * 0.1;
+    }
+  }
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <div style={styles.headerRow}>
-          <h1 style={styles.title}>Home</h1>
-
-          <button type="button" style={styles.button} onClick={loadDashboard}>
-            Refresh
-          </button>
-        </div>
+        <h1 style={styles.title}>Home</h1>
 
         {msg !== "" && <p style={styles.msg}>{msg}</p>}
-        {loading && <p style={styles.small}>Loading...</p>}
+        {data && isOverBudget && (
+            <div style={styles.alertDanger}>
+                 <b>Overspending!</b> Your expenses are higher than your monthly budget.
+            </div>
+    )}
+
+    {data && !isOverBudget && isWarning && (
+        <div style={styles.alertWarn}>
+             <b>Warning:</b> You are close to your budget limit.
+     </div>
+    )}
+
+
+        <div style={styles.section}>
+          <h2 style={styles.h2}>Monthly budget</h2>
+          <div style={styles.row}>
+            <input
+              style={styles.input}
+              value={budgetInput}
+              onChange={function (e) {
+                setBudgetInput(e.target.value);
+              }}
+              placeholder="Enter your monthly budget"
+            />
+            <button type="button" style={styles.button} onClick={saveBudget}>
+              Save
+            </button>
+          </div>
+        </div>
 
         {data && (
-          <div>
+          <div style={styles.section}>
+            <h2 style={styles.h2}>This month summary</h2>
+
             <div style={styles.grid}>
-              <div style={styles.statBox}>
-                <div style={styles.statLabel}>Monthly budget</div>
-                <div style={styles.statValue}>{data.monthlyBudget}</div>
+              <div style={styles.box}>
+                <div style={styles.label}>Budget</div>
+                <div style={styles.value}>{data.monthlyBudget}</div>
               </div>
-
-              <div style={styles.statBox}>
-                <div style={styles.statLabel}>Total expenses</div>
-                <div style={styles.statValue}>{data.totalExpenses}</div>
+              <div style={styles.box}>
+                <div style={styles.label}>Expenses</div>
+                <div style={styles.value}>{data.totalExpenses}</div>
               </div>
-
-              <div style={styles.statBox}>
-                <div style={styles.statLabel}>Remaining</div>
-                <div style={styles.statValue}>{data.remaining}</div>
-              </div>
+              <div style={styles.box}>
+                <div style={styles.label}>Remaining</div>
+                <div style={isOverBudget ? styles.valueRed : styles.value}>
+                    {data.remaining}
+                </div>
             </div>
+          </div>
+        </div>
+        )}
 
-            <div style={styles.section}>
-              <h2 style={styles.h2}>Budget usage</h2>
-              <div style={styles.progressOuter}>
-                <div style={{ ...styles.progressInner, width: spentPercent + "%" }} />
-              </div>
-              <div style={styles.small}>{Math.round(spentPercent)} percent spent</div>
-            </div>
+        {data && (
+          <div style={styles.section}>
+            <h2 style={styles.h2}>Spending by category (this month)</h2>
 
-            <div style={styles.section}>
-              <h2 style={styles.h2}>Expenses by category</h2>
+            {total === 0 && <p>No expenses for this month yet.</p>}
 
-              {data.byCategory.length === 0 && <p style={styles.small}>No expenses yet.</p>}
+            {total > 0 && (
+              <div style={styles.chartRow}>
+                <div style={styles.pieWrap}>
+                  <div style={{ ...styles.pie, background: gradient }} />
+                </div>
 
-              {data.byCategory.length > 0 && (
-                <div>
-                  {data.byCategory.map(function (x) {
-                    // bar width relative to biggest category
-                    const max = data.byCategory[0].amount;
-                    let w = 0;
-                    if (max > 0) {
-                      w = (x.amount / max) * 100;
-                    }
+                <div style={styles.legend}>
+                  {byCategory.map(function (x, index) {
+                    const percent = Math.round((x.amount / total) * 100);
+                    const color = getColor(index);
 
                     return (
-                      <div key={x.category} style={styles.row}>
-                        <div style={styles.rowLeft}>
-                          <div style={styles.categoryName}>{x.category}</div>
-                          <div style={styles.categoryAmount}>{x.amount}</div>
-                        </div>
-
-                        <div style={styles.barOuter}>
-                          <div style={{ ...styles.barInner, width: w + "%" }} />
+                      <div key={x.category} style={styles.legendItem}>
+                        <div style={{ ...styles.dot, background: color }} />
+                        <div>
+                          <div style={styles.legendTitle}>{x.category}</div>
+                          <div style={styles.legendText}>
+                            {x.amount} ({percent}%)
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            <button type="button" style={styles.refresh} onClick={loadDashboard}>
+              Refresh
+            </button>
           </div>
         )}
       </div>
@@ -118,109 +250,53 @@ export default function HomePage() {
 }
 
 const styles = {
-  page: {
-    maxWidth: 900,
-    margin: "0 auto",
-    padding: 20,
-  },
-  card: {
-    background: "#f5f5f51d",
-    border: "1px solid #e5e5e5",
-    borderRadius: 12,
-    padding: 20,
-  },
-  headerRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 10,
-  },
-  title: {
-    margin: 0,
-  },
-  button: {
-    padding: "10px 12px",
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    background: "#f5f5f5ff",
-    cursor: "pointer",
-  },
-  msg: {
-    color: "red",
+  page: { maxWidth: 900, margin: "0 auto", padding: 20 },
+  card: { background: "white", border: "1px solid #e5e5e5", borderRadius: 12, padding: 20 },
+  title: { marginTop: 0 },
+  msg: { color: "red" },
+
+  alertDanger: {
     marginTop: 10,
-  },
-  small: {
-    color: "#f6f4f4ff",
-    marginTop: 8,
-    fontSize: 14,
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
-    gap: 12,
-    marginTop: 15,
-  },
-  statBox: {
-    border: "1px solid #eee",
-    borderRadius: 10,
     padding: 12,
-    background: "#fafafab5",
+    borderRadius: 10,
+    border: "1px solid #ef4444",
+    background: "#fee2e2",
+    color: "#991b1b",
   },
-  statLabel: {
-    fontSize: 13,
-    color: "#171717ff",
-    fontWeight: "bold",
+
+  alertWarn: {
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 10,
+    border: "1px solid #f59e0b",
+    background: "#fef3c7",
+    color: "#92400e",
   },
-  statValue: {
+
+  valueRed: {
     fontSize: 22,
     fontWeight: "bold",
     marginTop: 6,
-    color: "#171717ff",
+    color: "red",
   },
-  section: {
-    marginTop: 18,
-    paddingTop: 10,
-    borderTop: "1px solid #eee",
-  },
-  h2: {
-    margin: "0 0 10px 0",
-    fontSize: 18,
-  },
-  progressOuter: {
-    height: 14,
-    background: "#eee",
-    borderRadius: 999,
-    overflow: "hidden",
-    border: "1px solid #ddd",
-  },
-  progressInner: {
-    height: "100%",
-    background: "#2b6cb0",
-  },
-  row: {
-    marginBottom: 10,
-  },
-  rowLeft: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: 6,
-    gap: 10,
-  },
-  categoryName: {
-    fontWeight: "bold",
-  },
-  categoryAmount: {
-    color: "#ffffffff",
-  },
-  barOuter: {
-    height: 10,
-    background: "#eee",
-    borderRadius: 999,
-    overflow: "hidden",
-    border: "1px solid #ddd",
-  },
-  barInner: {
-    height: "100%",
-    background: "#38a169",
-  },
+
+  section: { marginTop: 20, paddingTop: 10, borderTop: "1px solid #eee" },
+  h2: { margin: "0 0 10px 0", fontSize: 18 },
+  row: { display: "flex", gap: 10, alignItems: "center" },
+  input: { padding: "10px", borderRadius: 8, border: "1px solid #ccc", width: 280 },
+  button: { padding: "10px 14px", borderRadius: 8, border: "1px solid #ccc", background: "#f5f5f5", cursor: "pointer" },
+  grid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 },
+  box: { border: "1px solid #eee", borderRadius: 10, padding: 12, background: "#fafafa" },
+  label: { fontSize: 13, color: "#555" },
+  value: { fontSize: 22, fontWeight: "bold", marginTop: 6 },
+  chartRow: { display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" },
+  pieWrap: { width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center" },
+  pie: { width: 200, height: 200, borderRadius: "50%", border: "1px solid #ddd" },
+  legend: { minWidth: 260 },
+  legendItem: { display: "flex", gap: 10, alignItems: "center", marginBottom: 10 },
+  dot: { width: 12, height: 12, borderRadius: 999 },
+  legendTitle: { fontWeight: "bold" },
+  legendText: { color: "#444", fontSize: 14 },
+  refresh: { marginTop: 12, padding: "10px 14px", borderRadius: 8, border: "1px solid #ccc", background: "#f5f5f5", cursor: "pointer" },
 };
+

@@ -14,16 +14,19 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      match: [/\S+@\S+\.\S+/, "L'email est invalide"]
+      match: [/\S+@\S+\.\S+/, "the email is invalid"]
     },
     password: {
       type: String,
-      required: true //mot de passe haché
-    }
+      required: true 
+    },
+    monthlyBudget: { type: Number, default: 0 }
   },
+  
   {
     timestamps: true
   }
+
 );
 
 export default mongoose.model("User", userSchema);

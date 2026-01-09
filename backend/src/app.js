@@ -9,6 +9,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
+import { currentUser } from "./utils/currentUser.js";
+app.use(express.json());
+app.use(currentUser);
 
 // Base endpoints
 app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from CI/CD demo 👋" }));

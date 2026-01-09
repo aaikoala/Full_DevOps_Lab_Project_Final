@@ -1,21 +1,10 @@
-import express from "express";
+import { Router } from "express";
+import { requireAuth } from "../../utils/requireAuth.js";
+import { listTransactions, createTransaction } from "../../controllers/transaction.controller.js";
 
-import {
-  listTransactions,
-  createTransaction,
-  getTransaction,
-  updateTransaction,
-  deleteTransaction
-} from "../../controllers/transaction.controller.js";
+const router = Router();
 
-const router = express.Router();
-
-
-router.get("/", listTransactions);
-router.post("/", createTransaction);
-
-router.get("/:id", getTransaction); 
-router.put("/:id", updateTransaction);
-router.delete("/:id", deleteTransaction);
+router.get("/", requireAuth, listTransactions);
+router.post("/", requireAuth, createTransaction);
 
 export default router;
