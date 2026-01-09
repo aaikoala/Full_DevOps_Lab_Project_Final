@@ -3,7 +3,7 @@ import "./App.css";
 
 import HomePage from "./pages/HomePage";
 import BudgetPage from "./pages/BudgetPage";
-import UsersPage from "./pages/UsersPage";
+import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 
 export default function App() {
@@ -21,7 +21,7 @@ export default function App() {
             <div className="nav">
               <Link to="/">Home</Link>
               <Link to="/budget">My Budget</Link>
-              <Link to="/users">Users</Link>
+              <Link to="/profile">My Account</Link>
               <Link to="/login">Login</Link>
             </div>
           </div>
@@ -30,7 +30,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/budget" element={<BudgetPage />} />
-              <Route path="/users" element={<UsersPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/login" element={<LoginPage />} />
             </Routes>
           </div>
