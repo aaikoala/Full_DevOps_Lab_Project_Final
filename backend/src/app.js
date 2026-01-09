@@ -13,7 +13,7 @@ import { currentUser } from "./utils/currentUser.js";
 app.use(express.json());
 app.use(currentUser);
 
-// Base endpoints
+// endpoints
 app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from CI/CD demo 👋" }));
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 app.get("/api", (_req, res) => res.json({ ok: true, message: "Backend is running" }));
@@ -21,7 +21,7 @@ app.get("/api", (_req, res) => {
   res.json({ message: "Hello on the app Budg'Et ! If you want to manage your budget, you are on the right place !" });
 });
 
-// Auto-mount all routers in src/routes/auto/*.route.js under /api/<name>
+
 const autoDir = path.join(__dirname, "routes", "auto");
 if (fs.existsSync(autoDir)) {
   const files = fs.readdirSync(autoDir).filter((f) => f.endsWith(".route.js"));
@@ -37,7 +37,7 @@ if (fs.existsSync(autoDir)) {
   }
 }
 
-// Error handler must be last
+// error handler 
 app.use(errorHandler);
 
 export default app;

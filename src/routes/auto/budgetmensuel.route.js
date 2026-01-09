@@ -1,14 +1,13 @@
 /**
  * Monthly budget management
- * GET  /budgetmensuel -> { budget: number }
- * POST /budgetmensuel -> { budget: number }
+ * GET  /budgetmensuel 
+ * POST /budgetmensuel 
  */
 
 import { Router } from "express";
 
 const router = Router();
 
-// in-memory storage (no database)
 let monthlyBudget = 0;
 
 /**
@@ -19,10 +18,14 @@ router.get("/budgetmensuel", (_req, res) => {
 });
 
 /**
- * Define or update monthly budget
+ * define or update monthly budget
  */
 router.post("/budgetmensuel", (req, res) => {
-  const { budget } = req.body ?? {};
+  let budget;
+
+  if (req.body && req.body.budget !== undefined) {
+    budget = req.body.budget;
+  }
 
   // validation
   if (typeof budget !== "number" || Number.isNaN(budget) || budget < 0) {
@@ -36,5 +39,6 @@ router.post("/budgetmensuel", (req, res) => {
 
   return res.status(200).json({ budget: monthlyBudget });
 });
+
 
 export default router;

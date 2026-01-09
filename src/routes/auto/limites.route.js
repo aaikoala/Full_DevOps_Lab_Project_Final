@@ -1,14 +1,13 @@
 /**
  * Expense limits management
  * GET  /limites
- * POST /limites -> { categorie: string, limite: number }
+ * POST /limites 
  */
 
 import { Router } from "express";
 
 const router = Router();
 
-// in-memory storage (no database)
 const limites = {};
 
 /**
@@ -22,7 +21,13 @@ router.get("/limites", (_req, res) => {
  * Define or update a limit for a category
  */
 router.post("/limites", (req, res) => {
-  const { categorie, limite } = req.body ?? {};
+  let categorie;
+  let limite;
+
+  if (req.body) {
+    categorie = req.body.categorie;
+    limite = req.body.limite;
+  }
 
   // validation
   if (typeof categorie !== "string" || categorie.trim() === "") {

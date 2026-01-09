@@ -1,14 +1,14 @@
 /**
  * User profile management
- * GET  /profil -> returns user profile
- * PUT  /profil -> updates user profile
+ * GET  /profil : returns user profile
+ * PUT  /profil 
  */
 
 import { Router } from "express";
 
 const router = Router();
 
-// in-memory user profile
+// user profile
 let profil = {
   nom: "Doe",
   prenom: "John",
@@ -26,7 +26,15 @@ router.get("/profil", (_req, res) => {
  * Update user profile
  */
 router.put("/profil", (req, res) => {
-  const { nom, prenom, email } = req.body ?? {};
+  let nom;
+  let prenom;
+  let email;
+
+  if (req.body) {
+    nom = req.body.nom;
+    prenom = req.body.prenom;
+    email = req.body.email;
+  }
 
   // validation
   if (

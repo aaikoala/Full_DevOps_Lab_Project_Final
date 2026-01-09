@@ -1,15 +1,13 @@
 /**
  * Budget overspending alerts
- * GET /alertes -> returns alerts about global budget & category limits
+ * GET /alertes : returns alerts about the budget
  */
 
 import { Router } from "express";
 
 const router = Router();
 
-/**
- * In-memory mocked data (replace later with shared storage / DB)
- */
+
 const budgetMensuel = 1200;
 
 const limites = {
@@ -25,14 +23,19 @@ const depenses = [
   { categorie: "loisirs", montant: 210 },
 ];
 
-/**
- * Helper: sum expenses by category
- */
+// sum expenses by category
+
 const sumByCategorie = (items) => {
   const totals = {};
+
   for (const d of items) {
-    totals[d.categorie] = (totals[d.categorie] ?? 0) + d.montant;
+    if (totals[d.categorie] === undefined) {
+      totals[d.categorie] = d.montant;
+    } else {
+      totals[d.categorie] = totals[d.categorie] + d.montant;
+    }
   }
+
   return totals;
 };
 
@@ -44,7 +47,7 @@ router.get("/alertes", (_req, res) => {
 
   const alertes = [];
 
-  // global budget alert
+  // budget alert
   if (reste < 0) {
     alertes.push({
       type: "budget_mensuel",
@@ -68,7 +71,11 @@ router.get("/alertes", (_req, res) => {
   // category limits alerts
   for (const categorie of Object.keys(limites)) {
     const limite = limites[categorie];
-    const depenseCat = depensesParCategorie[categorie] ?? 0;
+    let depenseCat = 0;
+
+    if (depensesParCategorie[categorie] !== undefined) {
+       depenseCat = depensesParCategorie[categorie];
+    }
     const resteCat = limite - depenseCat;
 
     if (resteCat < 0) {

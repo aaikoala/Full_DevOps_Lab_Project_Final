@@ -146,6 +146,11 @@ export default function HomePage() {
       isWarning = data.remaining >= 0 && data.monthlyBudget > 0 && data.remaining <= data.monthlyBudget * 0.1;
     }
   }
+  let remainingStyle = styles.value;
+
+  if (isOverBudget) {
+     remainingStyle = styles.valueRed;
+  }
 
   return (
     <div style={styles.page}>
@@ -198,7 +203,7 @@ export default function HomePage() {
               </div>
               <div style={styles.box}>
                 <div style={styles.label}>Remaining</div>
-                <div style={isOverBudget ? styles.valueRed : styles.value}>
+                <div style={remainingStyle}>
                     {data.remaining}
                 </div>
             </div>

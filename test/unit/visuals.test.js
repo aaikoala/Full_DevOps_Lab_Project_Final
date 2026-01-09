@@ -13,7 +13,7 @@ describe("Visuals API", () => {
     // Check HTTP status
     expect(res.status).toBe(200);
 
-    // Check json structure
+    // check json structure
     expect(res.body).toHaveProperty("totalIncome");
     expect(res.body).toHaveProperty("totalExpense");
     expect(res.body).toHaveProperty("balance");

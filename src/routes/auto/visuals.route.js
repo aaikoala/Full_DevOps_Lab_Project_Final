@@ -65,7 +65,7 @@ router.get("/api/visuals/summary", (_req, res) => {
 
 /**
  * GET /api/visuals/expenses-by-category
- * Returns an array of { category, total }
+
  */
 router.get("/api/visuals/expenses-by-category", (_req, res) => {
   const map = {};
@@ -100,7 +100,6 @@ router.get("/api/visuals/expenses-by-category", (_req, res) => {
 
 /**
  * GET /api/visuals/incomes-by-source
- * Returns an array 
  */
 router.get("/api/visuals/incomes-by-source", (_req, res) => {
   const map = {};
@@ -135,7 +134,6 @@ router.get("/api/visuals/incomes-by-source", (_req, res) => {
 
 /**
  * GET /api/visuals/cashflow-by-month
- * Returns an array of { month, income, expense }
  */
 router.get("/api/visuals/cashflow-by-month", (_req, res) => {
   const map = {};

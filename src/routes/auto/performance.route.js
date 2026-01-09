@@ -1,23 +1,19 @@
 /**
  * performance and speed
- * - adds a response time header
- * - adds a very simple cache
  */
 
 import { Router } from "express";
 
 const router = Router();
 
-// ------------------------------
-// response time header
-// ------------------------------
+
+// response time 
 router.use(function (req, res, next) {
   var startTime = Date.now();
 
-  // Put the header before sending the response
+  // put the header before sending the response
   res.on("header", function () {});
-  // Better: set header right before response is finished (but BEFORE it is sent)
-  // We do it by wrapping res.writeHead
+  
   var originalWriteHead = res.writeHead;
 
   res.writeHead = function () {
@@ -29,10 +25,8 @@ router.use(function (req, res, next) {
   next();
 });
 
-// ------------------------------
-// very simple cache (GET only)
-// ------------------------------
-var cache = {}; // key -> { expiresAt, status, body, contentType }
+
+var cache = {}; 
 var stats = {
   hits: 0,
   misses: 0,
@@ -71,7 +65,7 @@ function simpleCache(req, res, next) {
   const originalSend = res.send.bind(res);
   const originalJson = res.json.bind(res);
 
-  // intercept res.send
+
   res.send = function (body) {
     if (res.statusCode === 200) {
       cache[key] = {
@@ -83,7 +77,7 @@ function simpleCache(req, res, next) {
     return originalSend(body);
   };
 
-  // intercept res.json
+
   res.json = function (data) {
     if (res.statusCode === 200) {
       cache[key] = {
@@ -101,9 +95,9 @@ function simpleCache(req, res, next) {
 // Apply cache to ALL /api/perf routes
 router.use("/api/perf", simpleCache);
 
-// ------------------------------
+
 // routes
-// ------------------------------
+
 router.get("/api/perf/stats", function (req, res) {
   res.status(200).json({
     cacheSize: Object.keys(cache).length,
@@ -122,10 +116,7 @@ router.post("/api/perf/clear-cache", function (req, res) {
   res.status(200).json({ message: "Cache cleared" });
 });
 
-/**
- * This route is ONLY to test caching easily.
- * It always returns 200 and JSON, so cache can HIT on second call.
- */
+
 router.get("/api/perf/ping", function (req, res) {
   res.status(200).json({ ok: true, message: "pong" });
 });

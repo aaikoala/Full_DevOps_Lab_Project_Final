@@ -49,10 +49,17 @@ export default function LoginPage() {
     if (mode === "login") setMode("register");
     else setMode("login");
   }
+  let titleText = "Login";
+  let switchText = "Register";
+
+  if (mode === "register") {
+    titleText = "Register";
+    switchText = "Login";
+  }
 
   return (
     <div style={{ maxWidth: 500, margin: "0 auto", padding: 20 }}>
-      <h1>{mode === "login" ? "Login" : "Register"}</h1>
+      <h1>{titleText}</h1>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {mode === "register" && (
@@ -74,7 +81,7 @@ export default function LoginPage() {
       {msg !== "" && <p style={{ color: "red" }}>{msg}</p>}
 
       <button type="button" onClick={switchMode} style={{ marginTop: 10 }}>
-        Switch to {mode === "login" ? "Register" : "Login"}
+        Switch to {switchText}
       </button>
     </div>
   );

@@ -15,7 +15,7 @@ export default function TransactionRow({ transaction, onDelete }) {
   );
 }
 
-//Verification des types des éléments transaction
+// checking the types of transaction elements
 TransactionRow.propTypes = {
   transaction: PropTypes.shape({
     _id: PropTypes.string.isRequired,

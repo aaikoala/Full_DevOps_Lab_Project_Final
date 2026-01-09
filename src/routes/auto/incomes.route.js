@@ -1,5 +1,5 @@
 /**
- * Incomes: manages incomes (money received)
+ * Incomes: manages incomes 
  */
 
 import { Router } from "express";
@@ -25,7 +25,7 @@ router.get("/api/incomes", (_req, res) => {
 
 /**
  * POST /api/incomes
- * Create a new income
+ *create a new income
  */
 router.post("/api/incomes", (req, res) => {
   const { label, amount } = req.body;
@@ -45,7 +45,7 @@ router.post("/api/incomes", (req, res) => {
     amount: Number(amount),
   };
 
-  // Add income to the list
+  // add income to the list
   incomes.push(newIncome);
 
   // Send a response
@@ -68,7 +68,7 @@ router.delete("/api/incomes/:id", (req, res) => {
     });
   }
 
-  // Remove the income
+  // remove the income
   incomes = incomes.filter((income) => income.id !== id);
 
   res.status(200).json({

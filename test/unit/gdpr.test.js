@@ -1,5 +1,5 @@
 /**
- *  tests for GDPR routes 
+ *  tests for gdpr routes 
  */
 
 import request from "supertest";

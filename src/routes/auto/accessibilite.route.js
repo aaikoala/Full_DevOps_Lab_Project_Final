@@ -1,5 +1,5 @@
 /**
- * Multi-platform accessibility (API capabilities)
+ * Multi-platform accessibility 
  * GET /accessibilite
  */
 

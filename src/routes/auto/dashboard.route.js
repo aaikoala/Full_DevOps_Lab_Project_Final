@@ -7,7 +7,6 @@ import { Router } from "express";
 
 const router = Router();
 
-// in-memory data (mocked aggregation)
 let dashboardData = {
   budgetMensuel: 1200,
   totalDepenses: 750,
