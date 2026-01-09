@@ -7,129 +7,143 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [status, setStatus] = useState("");
-  const [user, setUser] = useState(null);
+  const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
+  function clearForm() {
+    setUsername("");
+    setEmail("");
+    setPassword("");
+  }
+
+  async function submit(e) {
     e.preventDefault();
-    setStatus("");
+    setMsg("");
 
     if (mode === "register") {
       if (!username || !email || !password) {
-        setStatus("Please fill username, email and password");
+        setMsg("Please fill username, email and password");
         return;
       }
+    }
 
-      const res = await fetch("/api/auth/register", {
+    if (mode === "login") {
+      if (!email || !password) {
+        setMsg("Please fill email and password");
+        return;
+      }
+    }
+
+    setLoading(true);
+
+    try {
+      let url = "/api/auth/login";
+      let body = { email, password };
+
+      if (mode === "register") {
+        url = "/api/auth/register";
+        body = { username, email, password };
+      }
+
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: username, email: email, password: password })
+        body: JSON.stringify(body)
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setStatus(data.message || "Register failed");
+        if (data && data.message) setMsg(data.message);
+        else setMsg("Request failed");
+        setLoading(false);
         return;
       }
 
-      setUser(data);
-      setStatus("Register success. You are now saved in database.");
-      return;
+      localStorage.setItem("user", JSON.stringify(data));
+      setMsg("Success. You are connected.");
+
+      if (mode === "register") {
+        setMode("login");
+      }
+
+      clearForm();
+    } catch {
+      setMsg("Backend not reachable");
     }
 
-    if (!email || !password) {
-      setStatus("Please fill email and password");
-      return;
-    }
-
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setStatus(data.message || "Login failed");
-      return;
-    }
-
-    setUser(data);
-    setStatus("Login success.");
+    setLoading(false);
   }
 
-  function reset() {
-    setUsername("");
-    setEmail("");
-    setPassword("");
-    setStatus("");
-    setUser(null);
+  const saved = localStorage.getItem("user");
+  let currentUser = null;
+  if (saved) currentUser = JSON.parse(saved);
+
+  function logout() {
+    localStorage.removeItem("user");
+    setMsg("You are disconnected.");
   }
 
   return (
-    <div style={{ maxWidth: "420px", margin: "40px auto", padding: "20px", border: "1px solid #ddd", borderRadius: "10px" }}>
-      <h1 style={{ marginTop: 0 }}>{mode === "login" ? "Login" : "Register"}</h1>
+    <div style={{ maxWidth: 420, margin: "40px auto", padding: 20, border: "1px solid #ddd", borderRadius: 10 }}>
+      <h1 style={{ marginTop: 0 }}>Login</h1>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
-        <button onClick={() => { setMode("login"); reset(); }} style={{ padding: "8px 12px" }}>
+      <div style={{ display: "flex", gap: 10, marginBottom: 15 }}>
+        <button onClick={() => setMode("login")} disabled={mode === "login"}>
           Login
         </button>
-        <button onClick={() => { setMode("register"); reset(); }} style={{ padding: "8px 12px" }}>
+        <button onClick={() => setMode("register")} disabled={mode === "register"}>
           Register
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      {currentUser && (
+        <div style={{ padding: 10, background: "#f7f7f7", borderRadius: 8, marginBottom: 15 }}>
+          <div><b>Connected as:</b> {currentUser.username} ({currentUser.email})</div>
+          <button onClick={logout} style={{ marginTop: 10 }}>Logout</button>
+        </div>
+      )}
+
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {mode === "register" && (
-          <div style={{ marginBottom: "10px" }}>
+          <div>
             <label>Username</label>
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              style={{ width: "100%", padding: "8px" }}
-              placeholder="john_doe"
+              placeholder="username"
+              style={{ width: "100%" }}
             />
           </div>
         )}
 
-        <div style={{ marginBottom: "10px" }}>
+        <div>
           <label>Email</label>
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: "8px" }}
-            placeholder="john@mail.com"
+            placeholder="email"
+            style={{ width: "100%" }}
           />
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
+        <div>
           <label>Password</label>
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="password"
             type="password"
-            style={{ width: "100%", padding: "8px" }}
-            placeholder="123456"
+            style={{ width: "100%" }}
           />
         </div>
 
-        <button type="submit" style={{ padding: "10px 14px", width: "100%" }}>
-          {mode === "login" ? "Login" : "Create account"}
+        <button type="submit" disabled={loading}>
+          {loading ? "Loading..." : mode === "login" ? "Login" : "Create account"}
         </button>
       </form>
 
-      {status && <p style={{ marginTop: "15px" }}>{status}</p>}
-
-      {user && (
-        <div style={{ marginTop: "15px", padding: "10px", background: "#f6f6f6", borderRadius: "8px" }}>
-          <div><b>Logged user:</b></div>
-          <div>Username: {user.username}</div>
-          <div>Email: {user.email}</div>
-          <div>Id: {user._id}</div>
-        </div>
-      )}
+      {msg && <p style={{ marginTop: 15 }}>{msg}</p>}
     </div>
   );
 }
