@@ -9,7 +9,6 @@ import {
 
 const router = Router();
 
-// Mounted at /api/users
 router.get("/", listUsers);
 router.post("/", createUser);
 
