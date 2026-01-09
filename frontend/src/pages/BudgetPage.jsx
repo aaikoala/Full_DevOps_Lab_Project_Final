@@ -74,20 +74,21 @@ export default function BudgetPage() {
             <option value="depense">Expense</option>
             <option value="revenu">Income</option>
           </select>
+          
 
-          <select
-            style={styles.select}
-            value={categorie}
-            onChange={function (e) {
-              setCategorie(e.target.value);
-            }}
-          >
+          <select style={styles.select} value={categorie} onChange={function (e) { setCategorie(e.target.value); }}>
             <option value="food">Food</option>
             <option value="home">Home</option>
             <option value="transport">Transport</option>
+            <option value="health">Health</option>
+            <option value="shopping">Shopping</option>
             <option value="fun">Fun</option>
+            <option value="salary">Salary</option>
+            <option value="freelance">Freelance</option>
+            <option value="gift">Gift</option>
             <option value="other">Other</option>
           </select>
+
 
           <button type="submit" style={styles.button}>Add</button>
         </form>
