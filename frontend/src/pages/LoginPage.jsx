@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export default function LoginPage() {
-  const [mode, setMode] = useState("login"); // login or register
+  const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,25 +11,31 @@ export default function LoginPage() {
     e.preventDefault();
     setMsg("");
 
+    let url = "/api/auth/login";
+    let body = { email: email, password: password };
+
+    if (mode === "register") {
+      url = "/api/auth/register";
+      body = {
+        username: username,
+        email: email,
+        password: password,
+      };
+    }
+
     try {
-      const url =
-        mode === "login" ? "/api/auth/login" : "/api/auth/register";
-
-      const body =
-        mode === "login"
-          ? { email, password }
-          : { username, email, password };
-
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMsg(data.message || "Error");
+        setMsg(data.message);
         return;
       }
 
@@ -40,11 +46,20 @@ export default function LoginPage() {
     }
   }
 
+  function switchMode() {
+    if (mode === "login") {
+      setMode("register");
+    } else {
+      setMode("login");
+    }
+  }
+
   return (
     <div style={styles.page}>
       <div style={styles.card}>
         <h1 style={styles.title}>
-          {mode === "login" ? "Login" : "Register"}
+          {mode === "login" && "Login"}
+          {mode === "register" && "Register"}
         </h1>
 
         <form onSubmit={handleSubmit} style={styles.form}>
@@ -75,21 +90,15 @@ export default function LoginPage() {
           />
 
           <button style={styles.button}>
-            {mode === "login" ? "Login" : "Register"}
+            Submit
           </button>
         </form>
 
-        {msg && <p style={styles.msg}>{msg}</p>}
+        {msg !== "" && <p style={styles.msg}>{msg}</p>}
 
-        <button
-          style={styles.switch}
-          onClick={() =>
-            setMode(mode === "login" ? "register" : "login")
-          }
-        >
-          {mode === "login"
-            ? "Create an account"
-            : "Already have an account"}
+        <button style={styles.switch} onClick={switchMode}>
+          Switch to {mode === "login" && "Register"}
+          {mode === "register" && "Login"}
         </button>
       </div>
     </div>
@@ -102,53 +111,54 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#f0efef24",
+    background: "#ffffff35",
   },
   card: {
-    width: "350px",
-    padding: "30px",
-    borderRadius: "10px",
-    border: "1px solid #666666ff",
+    width: 350,
+    padding: 30,
+    borderRadius: 10,
+    border: "1px solid #dddddd37",
+    background: "#ffffff35",
   },
   title: {
     textAlign: "center",
-    marginBottom: "20px",
-    color: "#fcfcfcff",
+    marginBottom: 20,
+    color: "white",
   },
   form: {
     display: "flex",
     flexDirection: "column",
   },
   label: {
-    color: "#ffffffff",
-    marginBottom: "5px",
-    marginTop: "10px",
+    color: "white",
+    marginTop: 10,
+    marginBottom: 5,
     fontWeight: "bold",
   },
   input: {
-    padding: "8px",
-    borderRadius: "5px",
+    padding: 8,
+    borderRadius: 5,
     border: "1px solid #aaa",
   },
   button: {
-    marginTop: "20px",
-    padding: "10px",
-    background: "#000",
-    color: "#fff",
+    marginTop: 20,
+    padding: 10,
+    background: "black",
+    color: "white",
     border: "none",
-    borderRadius: "5px",
+    borderRadius: 5,
     cursor: "pointer",
   },
   switch: {
-    marginTop: "15px",
+    marginTop: 15,
     background: "none",
     border: "none",
-    color: "#ffffffff",
+    color: "white",
     cursor: "pointer",
     textDecoration: "underline",
   },
   msg: {
-    marginTop: "10px",
+    marginTop: 10,
     color: "red",
     textAlign: "center",
   },

@@ -5,18 +5,15 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [msg, setMsg] = useState("");
 
-  useEffect(function () {
-    const raw = localStorage.getItem("currentUser");
-    if (!raw) {
-      return;
-    }
-
-    const parsed = JSON.parse(raw);
-
-    setTimeout(function () {
-      setUser(parsed);
-    }, 0);
-  }, []);
+  useEffect(function () { 
+    const raw = localStorage.getItem("currentUser"); 
+    if (!raw) { 
+        return; } 
+    const parsed = JSON.parse(raw); 
+    setTimeout(function () { 
+        setUser(parsed); 
+        }, 0); 
+    }, []);
 
   function logout() {
     localStorage.removeItem("currentUser");
@@ -45,8 +42,8 @@ export default function ProfilePage() {
       }
 
       const data = await res.json();
-      setMsg(data.message || "Delete failed");
-    } catch  {
+      setMsg(data.message);
+    } catch {
       setMsg("Backend not reachable");
     }
   }
@@ -56,12 +53,16 @@ export default function ProfilePage() {
       <div style={styles.card}>
         <h1 style={styles.title}>My Account</h1>
 
-        {!user ? (
+        {!user && (
           <div>
             <p style={styles.text}>You are not logged in.</p>
-            <Link to="/login" style={styles.link}>Go to Login</Link>
+            <Link to="/login" style={styles.link}>
+              Go to Login
+            </Link>
           </div>
-        ) : (
+        )}
+
+        {user && (
           <div>
             <p style={styles.text}>
               <b>Username:</b> {user.username}
@@ -71,17 +72,17 @@ export default function ProfilePage() {
             </p>
 
             <div style={styles.row}>
-              <button type="button" onClick={logout} style={styles.btn}>
+              <button onClick={logout} style={styles.btn}>
                 Logout
               </button>
-              <button type="button" onClick={deleteAccount} style={styles.dangerBtn}>
+              <button onClick={deleteAccount} style={styles.dangerBtn}>
                 Delete account
               </button>
             </div>
           </div>
         )}
 
-        {msg !== "" ? <p style={styles.msg}>{msg}</p> : null}
+        {msg !== "" && <p style={styles.msg}>{msg}</p>}
       </div>
     </div>
   );
@@ -89,7 +90,7 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-    background: "#ffffff14",
+    background: "#ffffff3c",
     minHeight: "80vh",
     display: "flex",
     justifyContent: "center",
@@ -98,18 +99,18 @@ const styles = {
   },
   card: {
     width: 450,
-    border: "1px solid #dddddd28",
+    border: "1px solid #dddddd3b",
     borderRadius: 10,
     padding: 24,
-    background: "#ffffff14",
+    background: "#ffffff3c",
   },
   title: {
     marginTop: 0,
     marginBottom: 15,
-    color: "#fefefeff",
+    color: "white",
   },
   text: {
-    color: "#fcfafaff",
+    color: "white",
     marginBottom: 10,
   },
   row: {
@@ -121,22 +122,22 @@ const styles = {
     padding: "10px 12px",
     borderRadius: 6,
     border: "1px solid #aaa",
-    background: "#fdfafafd",
+    background: "#f5f5f5",
     cursor: "pointer",
   },
   dangerBtn: {
     padding: "10px 12px",
     borderRadius: 6,
-    border: "1px solid #ff7a7a",
+    border: "1px solid red",
     background: "#ffe5e5",
     cursor: "pointer",
   },
   msg: {
     marginTop: 15,
-    color: "#fffdfdff",
+    color: "red",
   },
   link: {
-    color: "#faf9f9ff",
+    color: "black",
     textDecoration: "underline",
   },
 };
