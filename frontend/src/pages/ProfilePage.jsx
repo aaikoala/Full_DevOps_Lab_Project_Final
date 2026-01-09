@@ -1,25 +1,31 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+//Displays the authenticated user's account details
 export default function ProfilePage() {
+  //navigation tool
   const navigate = useNavigate();
 
+  //Initialize user state
   const [user, setUser] = useState(function () {
     const raw = localStorage.getItem("session");
     if (!raw) return null;
 
     try {
       const session = JSON.parse(raw);
+      //Check if the session object contains user details
       if (session && session.user) return session.user;
       return null;
     } catch (error) {
       console.log(error);
-      return null;
+      return null; //Return null if parsing fails
     }
   });
 
   const [msg, setMsg] = useState("");
 
+  //Handles the logout process
+  //Updates state and redirects the user
   function logout() {
     localStorage.removeItem("session");
     setUser(null);

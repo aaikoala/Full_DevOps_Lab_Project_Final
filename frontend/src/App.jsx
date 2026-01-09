@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 
+//Importing page components
 import HomePage from "./pages/HomePage";
 import BudgetPage from "./pages/BudgetPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -8,6 +9,7 @@ import LoginPage from "./pages/LoginPage";
 
 export default function App() {
   return (
+    //Enables application routing features
     <BrowserRouter>
       <div className="appShell">
         <div className="appFrame">

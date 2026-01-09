@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { apiFetch, getSession } from "../utils/api";
 
+//Acts as the main dashboard for the user
 export default function HomePage() {
-  const [data, setData] = useState(null);
-  const [budgetInput, setBudgetInput] = useState("");
+  const [data, setData] = useState(null); //Stores dashboard data
+  const [budgetInput, setBudgetInput] = useState(""); //Manages the budget input field value
   const [msg, setMsg] = useState("");
 
+  //Handles session expiration
   function logoutBecauseTokenIsInvalid() {
     localStorage.removeItem("session");
     setData(null);
@@ -13,22 +15,26 @@ export default function HomePage() {
     setMsg("Your session expired. Please login again.");
   }
 
+  //Returns a palette of colors for the chart
   function getColors() {
     return ["#4f46e5", "#16a34a", "#f97316", "#dc2626", "#0ea5e9", "#a855f7"];
   }
 
+  //Gets a specific color based on the index
   function getColor(i) {
     const colors = getColors();
     return colors[i % colors.length];
   }
 
+  //Generates a string for the pie chart
+  //Calculates the percentage of the circle for each category
   function buildGradient(items, total) {
     let start = 0;
     const parts = [];
 
     for (let i = 0; i < items.length; i = i + 1) {
       const x = items[i];
-      const pct = (x.amount / total) * 100;
+      const pct = (x.amount / total) * 100; //Calculate percentage
       const end = start + pct;
       const color = getColor(i);
 
@@ -39,6 +45,7 @@ export default function HomePage() {
     return "conic-gradient(" + parts.join(", ") + ")";
   }
 
+  //Fetches dashboard data from the API
   async function loadDashboard() {
     setMsg("");
 
@@ -53,6 +60,7 @@ export default function HomePage() {
       const res = await apiFetch("/api/dashboard");
       const json = await res.json();
 
+      //Handle unauthorized by logging out
       if (!res.ok) {
         if (res.status === 401) {
           logoutBecauseTokenIsInvalid();
@@ -66,6 +74,7 @@ export default function HomePage() {
         return;
       }
 
+      //Update state with fetched data
       setData(json);
       setBudgetInput(String(json.monthlyBudget));
     } catch (err) {
@@ -74,6 +83,7 @@ export default function HomePage() {
     }
   }
 
+  //Updates the user's monthly budget
   async function saveBudget() {
     setMsg("");
 
@@ -84,6 +94,7 @@ export default function HomePage() {
     }
 
     const value = Number(budgetInput);
+    //Ensures it's a positive number
     if (Number.isNaN(value) || value < 0) {
       setMsg("Budget must be a non-negative number");
       return;
@@ -109,6 +120,7 @@ export default function HomePage() {
         return;
       }
 
+      //Update input field and reload dahsboard to reflect changes
       if (typeof json.budget === "number") {
         setBudgetInput(String(json.budget));
       }
@@ -121,6 +133,7 @@ export default function HomePage() {
     }
   }
 
+  //Load dashboard data 
   useEffect(function () {
     async function start() {
       await loadDashboard();
@@ -128,6 +141,7 @@ export default function HomePage() {
     start();
   }, []);
 
+  //Visualisation of the data
   let byCategory = [];
   let total = 0;
   let gradient = "";
@@ -135,19 +149,24 @@ export default function HomePage() {
   if (data) {
     if (Array.isArray(data.byCategory)) byCategory = data.byCategory;
     if (typeof data.totalExpenses === "number") total = data.totalExpenses;
+    //Builds the pie chart gradient only if there are expenses
     if (total > 0) gradient = buildGradient(byCategory, total);
   }
+
+  //Enables alert
   let isOverBudget = false;
   let isWarning = false;
 
   if (data) {
     if (typeof data.remaining === "number") {
       isOverBudget = data.remaining < 0;
+      //Warning if remaining budget is less than 10%
       isWarning = data.remaining >= 0 && data.monthlyBudget > 0 && data.remaining <= data.monthlyBudget * 0.1;
     }
   }
-  let remainingStyle = styles.value;
 
+  //Turns red if over budget
+  let remainingStyle = styles.value;
   if (isOverBudget) {
      remainingStyle = styles.valueRed;
   }
