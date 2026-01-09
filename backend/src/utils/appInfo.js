@@ -6,11 +6,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url); //get the current file path
 const __dirname = path.dirname(__filename);
 
 export function getPackageInfo() {
-  const pkg = JSON.parse(
+  const pkg = JSON.parse( // Read and parse
     fs.readFileSync(path.join(__dirname, "..", "..", "package.json"), "utf-8")
   );
   return { name: pkg.name, version: pkg.version };

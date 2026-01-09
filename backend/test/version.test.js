@@ -7,8 +7,8 @@ describe("GET /api/version", () => {
   it("returns package version as a non-empty string", async () => {
     const res = await request(app).get("/api/version");
     
-    expect(res.status).toBe(200);
-    expect(typeof res.body.version).toBe("string");
+    expect(res.status).toBe(200); // check HTTP status
+    expect(typeof res.body.version).toBe("string"); // Check the version type
     expect(res.body.version.length).toBeGreaterThan(0);
   });
 

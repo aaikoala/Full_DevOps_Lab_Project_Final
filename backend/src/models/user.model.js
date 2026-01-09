@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-
+// structure of a user
 const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
       required: true,
       unique: true,
-      trim: true
+      trim: true, //remove extra spaces
     },
     
     email: {

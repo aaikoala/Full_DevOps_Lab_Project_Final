@@ -17,6 +17,7 @@ app.use(currentUser);
 app.get("/", (_req, res) => res.json({ ok: true, message: "Hello from CI/CD demo 👋" }));
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 app.get("/api", (_req, res) => res.json({ ok: true, message: "Backend is running" }));
+// Welcome message
 app.get("/api", (_req, res) => {
   res.json({ message: "Hello on the app Budg'Et ! If you want to manage your budget, you are on the right place !" });
 });

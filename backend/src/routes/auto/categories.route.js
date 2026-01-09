@@ -7,12 +7,12 @@ let categories = [
   { id: 2, name: "Housing" }
 ];
 
-// GET /api/categories
+// GET /api/categories, return all the categories
 router.get("/", function (_req, res) {
   res.status(200).json(categories);
 });
 
-// POST /api/categories
+// POST /api/categories, create a new category
 router.post("/", function (req, res) {
   const name = req.body && req.body.name;
 
@@ -29,17 +29,17 @@ router.post("/", function (req, res) {
   if (exists) {
     return res.status(409).json({ error: true, message: "Category already exists" });
   }
-
+  // Create new category
   const newCategory = { id: categories.length + 1, name: cleanName };
   categories.push(newCategory);
-
+  // Return the created category
   res.status(201).json(newCategory);
 });
 
-// DELETE /api/categories/:id
+// DELETE /api/categories/:id, we delete a category by id
 router.delete("/:id", function (req, res) {
   const id = Number(req.params.id);
-
+  // Check if the category exists
   const exists = categories.some(function (c) {
     return c.id === id;
   });
@@ -47,7 +47,7 @@ router.delete("/:id", function (req, res) {
   if (!exists) {
     return res.status(404).json({ error: true, message: "Category not found" });
   }
-
+  //we remove the category from the list
   categories = categories.filter(function (c) {
     return c.id !== id;
   });

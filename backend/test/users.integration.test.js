@@ -5,7 +5,8 @@ import app from "../src/app.js";
 import User from "../src/models/user.model.js";
 import { connectToDb } from "../src/db/mongo.js";
 
-describe.sequential("API Transactions (Integration)", () => {
+describe.sequential("API Transactions (Integration)", () => { // the tests are run sequentially to avoid the database conflicts
+    // Connect to the database
   beforeAll(async () => {
     await connectToDb();
   }, 30000);
@@ -19,6 +20,7 @@ describe.sequential("API Transactions (Integration)", () => {
   });
 
   it("should create a user (POST)", async () => {
+    // create a user
     const res = await request(app).post("/api/users").send({
       username: "testuser",
       email: "testuser@test.com",
@@ -32,6 +34,7 @@ describe.sequential("API Transactions (Integration)", () => {
   }, 30000);
 
   it("should get all users (GET)", async () => {
+    // Create a user in the database
     await User.create({
       username: "alice",
       email: "alice@test.com",
@@ -47,6 +50,7 @@ describe.sequential("API Transactions (Integration)", () => {
   }, 30000);
 
   it("should delete a user (DELETE)", async () => {
+    // Create a user to delete
     const user = await User.create({
       username: "todelete",
       email: "delete@test.com",

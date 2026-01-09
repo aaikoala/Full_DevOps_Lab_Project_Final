@@ -3,11 +3,13 @@ import User from "../models/user.model.js";
 
 const memoryUsers = [];
 
+//check if MongoDB connection is ready
 function dbReady() {
   if (!mongoose.connection) return false;
   if (mongoose.connection.readyState === 1) return true;
   return false;
 }
+//Find a user in memory by id
 function findMemoryUser(id) {
   let i = 0;
   while (i < memoryUsers.length) {
@@ -24,10 +26,11 @@ function removePassword(user) {
 }
 
 /**
- * GET /api/users
+ * GET /api/users, return all the users
  */
 export async function listUsers(req, res, next) {
   try {
+    // if the database isn't ready, we use the memory storage
     if (!dbReady()) {
       const out = [];
       let i = 0;
@@ -37,7 +40,7 @@ export async function listUsers(req, res, next) {
       }
       return res.status(200).json(out);
     }
-
+    //read users from database
     const users = await User.find().select("-password").lean();
     return res.status(200).json(users);
   } catch (err) {
@@ -69,7 +72,7 @@ export async function getUser(req, res, next) {
 }
 
 /**
- * POST /api/users
+ * POST /api/users, create a new user
  */
 export async function createUser(req, res, next) {
   try {
@@ -77,7 +80,7 @@ export async function createUser(req, res, next) {
     const username = body && body.username;
     const email = body && body.email;
     const password = body && body.password;
-
+    // Check required fields
     if (!username || !email || !password) {
       return res.status(400).json({
         error: true,
@@ -104,7 +107,7 @@ export async function createUser(req, res, next) {
 
       return res.status(201).json(removePassword(created));
     }
-
+    //create user in database
     const createdDb = await User.create({ username: username, email: email, password: password });
     const safe = await User.findById(createdDb._id).select("-password").lean();
     return res.status(201).json(safe);
@@ -139,7 +142,7 @@ export async function updateUser(req, res, next) {
         return res.status(404).json({ error: true, message: "User not found" });
       }
 
-      // unique check simple
+      // Check uniqueness for username and email
       if (updates.username || updates.email) {
         i = 0;
         while (i < memoryUsers.length) {
@@ -161,7 +164,7 @@ export async function updateUser(req, res, next) {
 
       return res.status(200).json(removePassword(memoryUsers[index]));
     }
-
+    // Update user in database
     const updated = await User.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
@@ -207,7 +210,7 @@ export async function deleteUser(req, res, next) {
       memoryUsers.splice(index, 1);
       return res.status(204).end();
     }
-
+    // delete user from the database
     const deleted = await User.findByIdAndDelete(id).lean();
     if (!deleted) {
       return res.status(404).json({ error: true, message: "User not found" });

@@ -8,13 +8,13 @@ describe("Expenses API", () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
-
+  // test POST /api/expenses with missing fields
   it("POST /api/expenses returns 400 if fields are missing", async () => {
     const res = await request(app).post("/api/expenses").send({ label: "Coffee" });
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("error");
   });
-
+  // Send POST request with valid expense
   it("POST /api/expenses creates an expense", async () => {
     const res = await request(app).post("/api/expenses").send({
       label: "Coffee",

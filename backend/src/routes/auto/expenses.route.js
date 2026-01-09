@@ -4,12 +4,12 @@ const router = Router();
 
 let expenses = [{ id: 1, label: "Pizza", amount: 12, categoryId: 1 }];
 
-// GET /api/expenses
+// GET /api/expenses, get all the  expenses
 router.get("/", function (_req, res) {
   res.status(200).json(expenses);
 });
 
-// POST /api/expenses
+// create a new expense
 router.post("/", function (req, res) {
   const body = req.body || {};
   const label = body.label;

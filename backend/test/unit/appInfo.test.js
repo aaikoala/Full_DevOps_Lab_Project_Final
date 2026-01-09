@@ -8,6 +8,7 @@ import { getPackageInfo, getRuntimeInfo } from "../../src/utils/appInfo.js";
 describe("getPackageInfo", () => {
   it("returns name and version", () => {
     const info = getPackageInfo();
+    // Check that name and version exist
     expect(info).toHaveProperty("name");
     expect(info).toHaveProperty("version");
   });
@@ -16,6 +17,7 @@ describe("getPackageInfo", () => {
 describe("getRuntimeInfo", () => {
   it("returns node and uptime", () => {
     const runtime = getRuntimeInfo();
+    // check the types of the values returned
     expect(typeof runtime.node).toBe("string");
     expect(typeof runtime.uptime).toBe("number");
   });
@@ -23,7 +25,7 @@ describe("getRuntimeInfo", () => {
   it("calls process.uptime()", () => {
     const spy = vi.spyOn(process, "uptime");
     getRuntimeInfo();
-    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled(); // Check that uptime was called
     spy.mockRestore();
   });
 });

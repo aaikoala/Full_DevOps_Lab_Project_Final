@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-
+// strcture of a transaction 
 const transactionSchema = new mongoose.Schema(
   {
     userId: {
@@ -35,7 +35,7 @@ const transactionSchema = new mongoose.Schema(
       default: Date.now
     }
   },
-  { timestamps: true }
+  { timestamps: true } // add the creation date and last update date automatically
 );
 
 export default mongoose.models.Transaction ||
