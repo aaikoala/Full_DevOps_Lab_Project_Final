@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import useTransactions from "../hooks/useTransactions";
 
+//Main interface for managing the user's budget
+//Allows the users to view the transaction history and add new expenses/incomes
 export default function BudgetPage() {
   const { items, msg, load, add } = useTransactions();
 
@@ -13,10 +15,12 @@ export default function BudgetPage() {
     load();
   }, []);
 
+  //Handles the form submission
   function submit(e) {
     e.preventDefault();
 
     const amount = Number(montant);
+    //Ensures amount is a number
     if (Number.isNaN(amount)) return;
 
     add({
@@ -26,15 +30,18 @@ export default function BudgetPage() {
       categorie: categorie
     });
 
+    //Resets form fields after submission
     setTitre("");
     setMontant("");
   }
 
+  //Returns background color based on transaction type
   function getBadgeColor(t) {
     if (t.type === "revenu") return "#dcfce7";
     return "#fee2e2";
   }
 
+  //Returns border color based on transaction type
   function getBadgeBorder(t) {
     if (t.type === "revenu") return "1px solid #22c55e";
     return "1px solid #ef4444";
@@ -129,6 +136,7 @@ export default function BudgetPage() {
   );
 }
 
+//CSS Styles for the component
 const styles = {
   page: { maxWidth: 900, margin: "0 auto", padding: 20 },
   card: { background: "#fffefe34", border: "1px solid #e5e5e59d", borderRadius: 12, padding: 20 },

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+//Handles user authentification including login and registration
 export default function LoginPage() {
+  //Hook for redirecting after login
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("login");
@@ -10,19 +12,23 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
 
+  //Handles form submission
   async function handleSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); //Prevent default browser reload
     setMsg("");
 
+    //Default configuration for login
     let url = "/api/auth/login";
     let body = { email: email, password: password };
 
+    //If in register mode include username
     if (mode === "register") {
       url = "/api/auth/register";
       body = { username: username, email: email, password: password };
     }
 
     try {
+      //Send the request to the backend
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,11 +37,13 @@ export default function LoginPage() {
 
       const data = await res.json();
 
+      //Handles server-side errors
       if (!res.ok) {
         setMsg(data.message);
         return;
       }
 
+      //Redirect the user to their profile page
       localStorage.setItem("session", JSON.stringify(data));
       setMsg("Success");
 
@@ -45,10 +53,13 @@ export default function LoginPage() {
     }
   }
 
+  //Toggles the state between login and register
   function switchMode() {
     if (mode === "login") setMode("register");
     else setMode("login");
   }
+
+  //Dynamic text variables based on current mode
   let titleText = "Login";
   let switchText = "Register";
 

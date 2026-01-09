@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import TransactionRow from "./TransactionRow";
 
+//Transaction List Component
+//Fetches and displays a history of the transactions
 export default function TransactionList() {
   const [items, setItems] = useState([]);
 
+  //Calls the API to retrieve the list of transactions
   useEffect(() => {
     fetch("/api/transaction")
       .then((res) => res.json())
@@ -11,6 +14,8 @@ export default function TransactionList() {
       .catch((err) => console.error("Erreur fetch:", err));
   }, []);
 
+  //Deletes a transaction by its ID
+  //Sends a Delete request to the backend
   async function handleDelete(id) {
     const res = await fetch(`/api/transaction/${id}`, { method: "DELETE" });
     if (res.ok) {

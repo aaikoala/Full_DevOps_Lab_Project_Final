@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 
+//Displays the title, amount and type of the transactions
 export default function TransactionRow({ transaction, onDelete }) {
   return (
     <li style={{ marginBottom: "10px", padding: "5px", borderBottom: "1px solid #eee" }}>
@@ -15,7 +16,7 @@ export default function TransactionRow({ transaction, onDelete }) {
   );
 }
 
-// checking the types of transaction elements
+//Checks the types of transaction elements
 TransactionRow.propTypes = {
   transaction: PropTypes.shape({
     _id: PropTypes.string.isRequired,

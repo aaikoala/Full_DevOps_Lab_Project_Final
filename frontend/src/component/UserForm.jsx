@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+//Allows an user to create an account
+//Sends the data to the backend API
 export default function UserForm(props) {
   const onCreated = props.onCreated;
 
@@ -7,6 +9,7 @@ export default function UserForm(props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  //Sends a POST request to the API to create a new user
   function handleSubmit(e) {
     e.preventDefault();
 
@@ -27,7 +30,7 @@ export default function UserForm(props) {
         setPassword("");
         if (onCreated) onCreated();
       })
-      .catch((err) => alert(err.message));
+      .catch((err) => alert(err.message)); //Catches error message
   }
 
   return (
