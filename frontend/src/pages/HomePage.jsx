@@ -251,7 +251,7 @@ export default function HomePage() {
 
 const styles = {
   page: { maxWidth: 900, margin: "0 auto", padding: 20 },
-  card: { background: "white", border: "1px solid #e5e5e5", borderRadius: 12, padding: 20 },
+  card: { background: "#fffefe22", border: "1px solid #e5e5e5", borderRadius: 12, padding: 20 },
   title: { marginTop: 0 },
   msg: { color: "red" },
 
@@ -284,10 +284,10 @@ const styles = {
   h2: { margin: "0 0 10px 0", fontSize: 18 },
   row: { display: "flex", gap: 10, alignItems: "center" },
   input: { padding: "10px", borderRadius: 8, border: "1px solid #ccc", width: 280 },
-  button: { padding: "10px 14px", borderRadius: 8, border: "1px solid #ccc", background: "#f5f5f5", cursor: "pointer" },
+  button: { padding: "10px 14px", borderRadius: 8, border: "1px solid #ccc", background: "#bebebed7", cursor: "pointer" },
   grid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 },
-  box: { border: "1px solid #eee", borderRadius: 10, padding: 12, background: "#fafafa" },
-  label: { fontSize: 13, color: "#555" },
+  box: { border: "1px solid #eee", borderRadius: 10, padding: 12, background: "#fafafa51" },
+  label: { fontSize: 13, color: "#ffffffff",fontWeight: "bold" },
   value: { fontSize: 22, fontWeight: "bold", marginTop: 6 },
   chartRow: { display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" },
   pieWrap: { width: 220, height: 220, display: "flex", alignItems: "center", justifyContent: "center" },
@@ -296,7 +296,7 @@ const styles = {
   legendItem: { display: "flex", gap: 10, alignItems: "center", marginBottom: 10 },
   dot: { width: 12, height: 12, borderRadius: 999 },
   legendTitle: { fontWeight: "bold" },
-  legendText: { color: "#444", fontSize: 14 },
+  legendText: { color: "#ffffffff", fontSize: 14 },
   refresh: { marginTop: 12, padding: "10px 14px", borderRadius: 8, border: "1px solid #ccc", background: "#f5f5f5", cursor: "pointer" },
 };
 
